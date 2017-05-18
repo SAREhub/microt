@@ -16,19 +16,28 @@
  *
  */
 
-namespace SAREhub\Microt\App;
+namespace SAREhub\Microt\Test;
 
-use SAREhub\Commons\Misc\TimeProvider;
-use SAREhub\Microt\Test\ServiceProviderTestCase;
+use PHPUnit\Framework\TestCase;
+use Slim\Container;
 
-class TimeServiceProviderTest extends ServiceProviderTestCase {
+abstract class ServiceProviderTestCase extends TestCase {
 	
-	public function testRegister() {
-		$this->registerProvider();
-		$this->assertInstanceOf(TimeProvider::class, $this->getContainer()[TimeServiceProvider::ENTRY]);
+	private $container;
+	
+	protected function setUp() {
+		$this->container = new Container([]);
 	}
 	
-	protected function getProviderClass(): string {
-		return TimeServiceProvider::class;
+	protected function registerProvider() {
+		$providerClass = $this->getProviderClass();
+		$provider = new $providerClass();
+		$provider->register($this->container);
+	}
+	
+	protected abstract function getProviderClass(): string;
+	
+	protected function getContainer(): Container {
+		return $this->container;
 	}
 }
