@@ -16,7 +16,7 @@
  *
  */
 
-namespace SAREhub\Microt\App;
+namespace SAREhub\Microt\Util;
 
 use JSend\JSendResponse;
 use PHPUnit\Framework\TestCase;
