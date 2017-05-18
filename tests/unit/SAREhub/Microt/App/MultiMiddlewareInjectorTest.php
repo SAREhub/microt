@@ -18,10 +18,20 @@
 
 namespace SAREhub\Microt\App;
 
-
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use PHPUnit\Framework\TestCase;
+use SAREhub\Microt\MiddlewareInjector;
 use Slim\App;
 
-interface MiddlewareInjector {
+class MultiMiddlewareInjectorTest extends TestCase {
 	
-	public function injectTo(App $app);
+	use MockeryPHPUnitIntegration;
+	
+	public function testInjectTo() {
+		$app = \Mockery::mock(App::class);
+		$injector = \Mockery::mock(MiddlewareInjector::class);
+		$injector->shouldReceive('injectTo')->with($app)->once();
+		$multiInjector = new MultiMiddlewareInjector([$injector]);
+		$multiInjector->injectTo($app);
+	}
 }

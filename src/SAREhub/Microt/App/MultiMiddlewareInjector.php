@@ -21,7 +21,20 @@ namespace SAREhub\Microt\App;
 
 use Slim\App;
 
-interface MiddlewareInjector {
+class MultiMiddlewareInjector implements MiddlewareInjector {
 	
-	public function injectTo(App $app);
+	/**
+	 * @var MiddlewareInjector[]
+	 */
+	private $injectors;
+	
+	public function __construct(array $injectors) {
+		$this->injectors = $injectors;
+	}
+	
+	public function injectTo(App $app) {
+		foreach ($this->injectors as $i) {
+			$i->injectTo($app);
+		}
+	}
 }
