@@ -1,0 +1,33 @@
+{
+  "description": "microt is framework for build microservice",
+  "license": "Apache-2.0",
+  "keywords": [
+    "SARE",
+    "SAREhub"
+  ],
+  "authors": [
+    {
+      "name": "Andrzej Wasiak",
+      "email": "a.wasiak@sarehub.con"
+    }
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "6.*",
+    "mockery/mockery": "^0.9",
+    "guzzlehttp/guzzle": "^6.2"
+
+  },
+  "require": {
+    "php": "^7.0",
+    "sarehub/commons": "0.6.*",
+    "slim/slim-skeleton": "^3.0",
+    "monolog/monolog": "1.*",
+    "respect/validation": "^1.1",
+    "nannehuiges/jsend": "2.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "SAREhub\\": "src/SAREhub"
+    }
+  }
+}
