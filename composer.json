@@ -16,7 +16,6 @@
     "phpunit/phpunit": "6.*",
     "mockery/mockery": "^0.9",
     "guzzlehttp/guzzle": "^6.2"
-
   },
   "require": {
     "php": "^7.0",
