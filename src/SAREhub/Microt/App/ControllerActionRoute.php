@@ -21,7 +21,7 @@ namespace SAREhub\Microt\App;
 
 use Slim\App;
 
-class ControllerActionRoute implements MiddlewareInjector {
+class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable {
 	
 	const ACTION_POSTFIX = 'Action';
 	
@@ -55,11 +55,15 @@ class ControllerActionRoute implements MiddlewareInjector {
 		return self::route()->httpMethod('DELETE')->pattern($pattern)->action($action);
 	}
 	
+	public static function options(string $pattern = '', string $action): ControllerActionRoute {
+		return self::route()->httpMethod('OPTIONS')->pattern($pattern)->action($action);
+	}
+	
 	public static function route(): ControllerActionRoute {
 		return new self();
 	}
 	
-	public function controllerClass(string $class): ControllerActionRoute {
+	public function controller(string $class): ControllerActionRoute {
 		$this->controllerClass = $class;
 		return $this;
 	}
@@ -84,7 +88,7 @@ class ControllerActionRoute implements MiddlewareInjector {
 		return $this;
 	}
 	
-	public function getControllerClass(): string {
+	public function getController(): string {
 		return $this->controllerClass;
 	}
 	
@@ -105,11 +109,21 @@ class ControllerActionRoute implements MiddlewareInjector {
 	}
 	
 	public function getControllerActionString(): string {
-		return $this->getControllerClass().':'.$this->getAction().self::ACTION_POSTFIX;
+		return $this->getController().':'.$this->getAction().self::ACTION_POSTFIX;
 	}
 	
 	public function injectTo(App $app) {
 		$r = $app->map([$this->getHttpMethod()], $this->getPattern(), $this->getControllerActionString());
 		$this->getMiddlewareInjector()->injectTo($r);
+	}
+	
+	public function jsonSerialize() {
+		return [
+		  'httpMethod' => $this->getHttpMethod(),
+		  'pattern' => $this->getPattern(),
+		  'controller' => $this->getController(),
+		  'action' => $this->getAction(),
+		  'middlewareInjector' => $this->getMiddlewareInjector() instanceof \JsonSerializable
+		];
 	}
 }

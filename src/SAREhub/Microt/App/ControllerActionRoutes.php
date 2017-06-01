@@ -20,7 +20,7 @@ namespace SAREhub\Microt\App;
 
 use Slim\App;
 
-class ControllerActionRoutes implements MiddlewareInjector {
+class ControllerActionRoutes implements MiddlewareInjector, \JsonSerializable {
 	
 	private $baseUri;
 	private $controllerClass;
@@ -36,15 +36,45 @@ class ControllerActionRoutes implements MiddlewareInjector {
 		return new self($baseUri, $controllerClass);
 	}
 	
+	public function post(string $pattern, string $action): ControllerActionRoute {
+		$route = ControllerActionRoute::post($pattern, $action);
+		$this->addRoute($route);
+		return $route;
+	}
+	
+	public function get(string $pattern, string $action): ControllerActionRoute {
+		$route = ControllerActionRoute::get($pattern, $action);
+		$this->addRoute($route);
+		return $route;
+	}
+	
+	public function put(string $pattern, string $action): ControllerActionRoute {
+		$route = ControllerActionRoute::put($pattern, $action);
+		$this->addRoute($route);
+		return $route;
+	}
+	
+	public function patch(string $pattern, string $action): ControllerActionRoute {
+		$route = ControllerActionRoute::patch($pattern, $action);
+		$this->addRoute($route);
+		return $route;
+	}
+	
+	public function delete(string $pattern, string $action): ControllerActionRoute {
+		$route = ControllerActionRoute::delete($pattern, $action);
+		$this->addRoute($route);
+		return $route;
+	}
+	
 	public function addRoute(ControllerActionRoute $r): self {
-		$r->controllerClass($this->getControllerClass());
+		$r->controller($this->getController());
 		$r->pattern($this->getBaseUri().$r->getPattern());
 		$this->routes[] = $r;
 		return $this;
 	}
 	
 	public function injectTo(App $app) {
-		foreach ($this->getAll() as $route) {
+		foreach ($this->getRoutes() as $route) {
 			$route->injectTo($app);
 		}
 	}
@@ -53,15 +83,22 @@ class ControllerActionRoutes implements MiddlewareInjector {
 		return $this->baseUri;
 	}
 	
-	public function getControllerClass(): string {
+	public function getController(): string {
 		return $this->controllerClass;
 	}
 	
 	/**
 	 * @return ControllerActionRoute[]
 	 */
-	public function getAll(): array {
+	public function getRoutes(): array {
 		return $this->routes;
 	}
 	
+	public function jsonSerialize() {
+		return [
+		  'baseUri' => $this->getBaseUri(),
+		  'controller' => $this->getController(),
+		  'routes' => $this->getRoutes()
+		];
+	}
 }

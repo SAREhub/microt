@@ -27,12 +27,12 @@ class ControllerActionRouteTest extends TestCase {
 	
 	use MockeryPHPUnitIntegration;
 	
-	public function testPOSTRoute() {
+	public function testPOST() {
 		$r = ControllerActionRoute::post('p', 'a');
 		$this->assertRoute('POST', 'p', 'a', $r);
 	}
 	
-	public function testGETRoute() {
+	public function testGET() {
 		$r = ControllerActionRoute::get('p', 'a');
 		$this->assertRoute('GET', 'p', 'a', $r);
 	}
@@ -42,18 +42,23 @@ class ControllerActionRouteTest extends TestCase {
 		$this->assertRoute('PUT', 'p', 'a', $r);
 	}
 	
-	public function testPATCHRoute() {
+	public function testPATCH() {
 		$r = ControllerActionRoute::patch('p', 'a');
 		$this->assertRoute('PATCH', 'p', 'a', $r);
 	}
 	
-	public function testDELETERoute() {
+	public function testDELETE() {
 		$r = ControllerActionRoute::delete('p', 'a');
 		$this->assertRoute('DELETE', 'p', 'a', $r);
 	}
 	
+	public function testOPTIONS() {
+		$r = ControllerActionRoute::options('p', 'a');
+		$this->assertRoute('OPTIONS', 'p', 'a', $r);
+	}
+	
 	public function testGetControllerActionString() {
-		$r = ControllerActionRoute::route()->controllerClass('c')->action('b');
+		$r = ControllerActionRoute::route()->controller('c')->action('b');
 		$this->assertEquals('c:bAction', $r->getControllerActionString());
 	}
 	
@@ -62,7 +67,7 @@ class ControllerActionRouteTest extends TestCase {
 		$r = ControllerActionRoute::route()
 		  ->httpMethod('m')
 		  ->pattern('p')
-		  ->controllerClass('c')
+		  ->controller('c')
 		  ->action('b')
 		  ->middlewareInjector($middlewareInjector);
 		
@@ -73,11 +78,10 @@ class ControllerActionRouteTest extends TestCase {
 		$r->injectTo($app);
 	}
 	
-	
 	private function assertRoute(string $expectedMethod, string $expectedPattern, string $expectedAction, ControllerActionRoute $r) {
-		$this->assertEquals($expectedMethod, $r->getHttpMethod());
-		$this->assertEquals($expectedPattern, $r->getPattern());
-		$this->assertEquals($expectedAction, $r->getAction());
+		$this->assertEquals($expectedMethod, $r->getHttpMethod(), 'route http method');
+		$this->assertEquals($expectedPattern, $r->getPattern(), 'route pattern');
+		$this->assertEquals($expectedAction, $r->getAction(), 'route action');
 	}
 	
 	

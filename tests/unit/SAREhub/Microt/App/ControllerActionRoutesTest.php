@@ -35,12 +35,57 @@ class ControllerActionRoutesTest extends TestCase {
 		$this->routes = ControllerActionRoutes::create('base', 'c');
 	}
 	
+	public function testPOST() {
+		$r = $this->routes->post('/p', 'a');
+		$this->assertRouteHttpMethod('POST', $r);
+		$this->assertRoutePattern('base/p', $r);
+		$this->assertRouteAction('a', $r);
+		$this->assertSame([$r], $this->routes->getRoutes());
+	}
+	
+	public function testGET() {
+		$r = $this->routes->get('/p', 'a');
+		$this->assertRouteHttpMethod('GET', $r);
+		$this->assertRoutePattern('base/p', $r);
+		$this->assertRouteAction('a', $r);
+		$this->assertSame([$r], $this->routes->getRoutes());
+	}
+	
+	public function testPUT() {
+		$r = $this->routes->put('/p', 'a');
+		$this->assertRouteHttpMethod('PUT', $r);
+		$this->assertRoutePattern('base/p', $r);
+		$this->assertRouteController('c', $r);
+		$this->assertRouteAction('a', $r);
+		$this->assertSame([$r], $this->routes->getRoutes());
+	}
+	
+	public function testPATCH() {
+		$r = $this->routes->patch('/p', 'a');
+		$this->assertRouteHttpMethod('PATCH', $r);
+		$this->assertRoutePattern('base/p', $r);
+		$this->assertRouteController('c', $r);
+		$this->assertRouteAction('a', $r);
+		
+		$this->assertSame([$r], $this->routes->getRoutes());
+	}
+	
+	public function testDELETE() {
+		$r = $this->routes->delete('/p', 'a');
+		$this->assertRouteHttpMethod('DELETE', $r);
+		$this->assertRoutePattern('base/p', $r);
+		$this->assertRouteController('c', $r);
+		$this->assertRouteAction('a', $r);
+		
+		$this->assertSame([$r], $this->routes->getRoutes());
+	}
+	
 	public function testAddRoute() {
-		$route = ControllerActionRoute::route()->pattern('/p');
-		$this->routes->addRoute($route);
-		$this->assertEquals('c', $route->getControllerClass());
-		$this->assertEquals('base/p', $route->getPattern());
-		$this->assertSame([$route], $this->routes->getAll());
+		$r = ControllerActionRoute::route()->pattern('/p');
+		$this->routes->addRoute($r);
+		$this->assertRouteController('c', $r);
+		$this->assertRoutePattern('base/p', $r);
+		$this->assertSame([$r], $this->routes->getRoutes());
 	}
 	
 	public function testInjectTo() {
@@ -50,5 +95,21 @@ class ControllerActionRoutesTest extends TestCase {
 		$route->shouldReceive('injectTo')->with($app)->once();
 		$this->routes->addRoute($route);
 		$this->routes->injectTo($app);
+	}
+	
+	public function assertRouteHttpMethod(string $expected, ControllerActionRoute $route) {
+		$this->assertEquals($expected, $route->getHttpMethod(), 'route http method');
+	}
+	
+	public function assertRoutePattern(string $expected, ControllerActionRoute $route) {
+		$this->assertEquals($expected, $route->getPattern(), 'route pattern');
+	}
+	
+	public function assertRouteAction(string $expected, ControllerActionRoute $route) {
+		$this->assertEquals($expected, $route->getAction(), 'route action');
+	}
+	
+	public function assertRouteController(string $expected, ControllerActionRoute $route) {
+		$this->assertEquals($expected, $route->getController(), 'route controller');
 	}
 }
