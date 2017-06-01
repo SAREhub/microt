@@ -26,6 +26,5 @@ class RequestIdProcessorTest extends TestCase {
 		$p = new RequestIdProcessor(1);
 		$record = ['message' => 'test', 'extra' => []];
 		$this->assertEquals(['message' => 'test', 'extra' => ['requestId' => 1]], $p($record));
-		
 	}
 }
