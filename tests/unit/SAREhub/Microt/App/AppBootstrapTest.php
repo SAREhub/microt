@@ -21,7 +21,6 @@ namespace SAREhub\Microt\App;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\Mock;
 use PHPUnit\Framework\TestCase;
-use SAREhub\Microt\MiddlewareInjector;
 use Slim\App;
 use Slim\Container;
 

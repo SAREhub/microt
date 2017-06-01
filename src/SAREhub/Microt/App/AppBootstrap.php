@@ -18,11 +18,12 @@
 
 namespace SAREhub\Microt\App;
 
-
-use SAREhub\Microt\MiddlewareInjector;
+use Pimple\Container;
 use Slim\App;
 
 class AppBootstrap {
+	
+	const APP_NAME_ENTRY = 'app.name';
 	
 	/**
 	 * @var App
@@ -43,6 +44,10 @@ class AppBootstrap {
 		$this->app = $app ?? new App();
 	}
 	
+	public function setAppName(string $name) {
+		$this->getContainer()[self::APP_NAME_ENTRY] = $name;
+	}
+	
 	public function setServiceProvider(ServiceProvider $provider) {
 		$this->serviceProvider = $provider;
 	}
@@ -52,9 +57,13 @@ class AppBootstrap {
 	}
 	
 	public function run() {
-		$this->serviceProvider->register($this->app->getContainer());
+		$this->serviceProvider->register($this->getContainer());
 		$this->middlewareInjector->injectTo($this->app);
 		$this->app->run();
+	}
+	
+	private function getContainer(): Container {
+		return $this->app->getContainer();
 	}
 	
 }
