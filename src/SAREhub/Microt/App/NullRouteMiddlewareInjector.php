@@ -18,9 +18,12 @@
 
 namespace SAREhub\Microt\App;
 
+
 use Slim\Interfaces\RouteInterface;
 
-interface RouteMiddlewareInjector {
+class NullRouteMiddlewareInjector implements RouteMiddlewareInjector {
 	
-	public function injectTo(RouteInterface $route);
+	public function injectTo(RouteInterface $route) {
+	
+	}
 }
