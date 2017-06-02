@@ -18,8 +18,8 @@
 
 namespace SAREhub\Microt\App;
 
-use Pimple\Container;
 use SAREhub\Commons\Misc\TimeProvider;
+use Slim\Container;
 
 class TimeServiceProvider implements ServiceProvider {
 	

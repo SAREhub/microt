@@ -19,7 +19,7 @@
 namespace SAREhub\Microt\App;
 
 
-use Pimple\Container;
+use Slim\Container;
 
 class MultiServiceProvider implements ServiceProvider {
 	
