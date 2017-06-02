@@ -18,12 +18,12 @@
 
 namespace SAREhub\Microt\Test\App;
 
-use GuzzleHttp\Psr7\Response;
 use JSend\JSendResponse;
 use PHPUnit\Framework\TestCase;
 use SAREhub\Microt\App\BasicController;
 use Slim\Container;
 use Slim\Http\Request;
+use Slim\Http\Response;
 
 abstract class ControllerTestCase extends TestCase {
 	
