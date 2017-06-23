@@ -33,11 +33,11 @@ class JsonResponse {
 		return new self($orginal);
 	}
 	
-	public function ok(array $body = null): Response {
+	public function ok($body = null): Response {
 		return $this->create($body, 200);
 	}
 	
-	public function created(array $body = null): Response {
+	public function created($body = null): Response {
 		return $this->create($body, 201);
 	}
 	
@@ -65,7 +65,7 @@ class JsonResponse {
 		];
 	}
 	
-	private function create(array $body, int $status) {
+	private function create($body, int $status) {
 		return $this->orginal->withJson($body, $status, $this->encodingOptions);
 	}
 }
