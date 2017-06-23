@@ -18,7 +18,6 @@
 
 namespace SAREhub\Microt\Util;
 
-use JSend\JSendResponse;
 use PHPUnit\Framework\TestCase;
 use Slim\Http\Response;
 
@@ -36,28 +35,43 @@ class JsonResponseTest extends TestCase {
 	}
 	
 	public function testOk() {
-		$this->assertResponse(200, JSendResponse::success(['data']), $this->resp->ok(['data']));
+		$this->assertResponse(200, ['data'], $this->resp->ok(['data']));
 	}
 	
 	public function testCreated() {
-		$this->assertResponse(201, JSendResponse::success(['data']), $this->resp->created(['data']));
+		$this->assertResponse(201, ['data'], $this->resp->created(['data']));
+	}
+	
+	public function testCreateErrorBody() {
+		$message = 'test_message';
+		$details = ['test_details'];
+		$expectedBody = ['message' => $message, 'details' => $details];
+		$this->assertEquals($expectedBody, JsonResponse::createErrorBody($message, $details));
 	}
 	
 	public function testBadRequest() {
-		$this->assertResponse(400, JSendResponse::fail(['data']), $this->resp->badRequest(['data']));
+		$message = 'test_message';
+		$details = ['detail'];
+		$expectedBody = JsonResponse::createErrorBody($message, $details);
+		$this->assertResponse(400, $expectedBody, $this->resp->badRequest($message, $details));
 	}
 	
 	public function testNotFound() {
-		$this->assertResponse(404, JSendResponse::fail(['data']), $this->resp->notFound(['data']));
+		$message = 'test_message';
+		$details = ['detail'];
+		$expectedBody = JsonResponse::createErrorBody($message, $details);
+		$this->assertResponse(404, $expectedBody, $this->resp->notFound($message, $details));
 	}
 	
 	public function testInternalServerError() {
-		$this->assertResponse(500, JSendResponse::error('message', null, ['data']), $this->resp->internalServerError('message', ['data']));
+		$message = 'test_message';
+		$details = ['detail'];
+		$expectedBody = JsonResponse::createErrorBody($message, $details);
+		$this->assertResponse(500, $expectedBody, $this->resp->internalServerError($message, $details));
 	}
 	
-	private function assertResponse($expectedStatusCode, JSendResponse $expectedBody, Response $response) {
-		$this->assertEquals($expectedStatusCode, $response->getStatusCode());
-		$expectedBody->setEncodingOptions(JSON_PRETTY_PRINT);
-		$this->assertJsonStringEqualsJsonString($expectedBody->encode(), (string)$response->getBody());
+	private function assertResponse($expectedCode, array $expectedBody, Response $response) {
+		$this->assertEquals($expectedCode, $response->getStatusCode(), 'response status code');
+		$this->assertJsonStringEqualsJsonString(json_encode($expectedBody, JSON_PRETTY_PRINT), (string)$response->getBody(), 'response body');
 	}
 }
