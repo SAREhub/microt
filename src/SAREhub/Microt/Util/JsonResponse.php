@@ -29,11 +29,11 @@ class JsonResponse {
 		$this->orginal = $orginal;
 	}
 	
-	public static function wrap(Response $orginal): self {
+	public static function wrap(Response $orginal): JsonResponse {
 		return new self($orginal);
 	}
 	
-	public function ok(array $body = null) {
+	public function ok(array $body = null): Response {
 		return $this->create($body, 200);
 	}
 	
@@ -41,7 +41,7 @@ class JsonResponse {
 		return $this->create($body, 201);
 	}
 	
-	public function badRequest(string $message, array $details = null) {
+	public function badRequest(string $message, array $details = null): Response {
 		return $this->error($message, $details, 400);
 	}
 	
@@ -49,7 +49,7 @@ class JsonResponse {
 		return $this->error($message, $details, 404);
 	}
 	
-	public function internalServerError(string $message, array $details = null) {
+	public function internalServerError(string $message, array $details = null): Response {
 		return $this->error($message, $details, 500);
 	}
 	
@@ -58,7 +58,7 @@ class JsonResponse {
 		return $this->create($body, $statusCode);
 	}
 	
-	public static function createErrorBody(string $message, array $details = null) {
+	public static function createErrorBody(string $message, array $details = null): array {
 		return [
 		  'message' => $message,
 		  'details' => $details
