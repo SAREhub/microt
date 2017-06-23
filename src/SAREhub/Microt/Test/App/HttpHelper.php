@@ -23,6 +23,7 @@ use Slim\Http\Environment;
 use Slim\Http\Request;
 use Slim\Http\RequestBody;
 use Slim\Http\Response;
+use Slim\Route;
 
 class HttpHelper {
 	
@@ -51,5 +52,10 @@ class HttpHelper {
 	
 	public static function response(): Response {
 		return new Response();
+	}
+	
+	public static function routeWithArguments(array $arguments): Route {
+		$route = new Route('GET', 'pattern', function () { });
+		return $route->setArguments($arguments);
 	}
 }
