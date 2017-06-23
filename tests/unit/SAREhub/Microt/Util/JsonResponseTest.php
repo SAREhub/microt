@@ -42,6 +42,16 @@ class JsonResponseTest extends TestCase {
 		$this->assertResponse(201, ['data'], $this->resp->created(['data']));
 	}
 	
+	public function testNoContent() {
+		$response = $this->resp->noContent();
+		$this->assertEquals(204, $response->getStatusCode(), 'response status code');
+		$this->assertEquals(0, $response->getBody()->getSize());
+	}
+	
+	public function testSuccess() {
+		$this->assertResponse(200, ['data'], $this->resp->success(['data'], 200));
+	}
+	
 	public function testCreateErrorBody() {
 		$message = 'test_message';
 		$details = ['test_details'];
@@ -70,7 +80,7 @@ class JsonResponseTest extends TestCase {
 		$this->assertResponse(500, $expectedBody, $this->resp->internalServerError($message, $details));
 	}
 	
-	private function assertResponse($expectedCode, array $expectedBody, Response $response) {
+	private function assertResponse($expectedCode, $expectedBody, Response $response) {
 		$this->assertEquals($expectedCode, $response->getStatusCode(), 'response status code');
 		$this->assertJsonStringEqualsJsonString(json_encode($expectedBody, JSON_PRETTY_PRINT), (string)$response->getBody(), 'response body');
 	}

@@ -33,12 +33,20 @@ class JsonResponse {
 		return new self($orginal);
 	}
 	
-	public function ok($body = null): Response {
+	public function ok($body): Response {
 		return $this->create($body, 200);
 	}
 	
-	public function created($body = null): Response {
+	public function created($body): Response {
 		return $this->create($body, 201);
+	}
+	
+	public function noContent(): Response {
+		return $this->orginal->withStatus(204);
+	}
+	
+	public function success($body, int $statusCode = 200): Response {
+		return $this->create($body, $statusCode);
 	}
 	
 	public function badRequest(string $message, array $details = null): Response {
