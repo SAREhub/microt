@@ -59,7 +59,7 @@ abstract class ControllerTestCase extends TestCase {
 		return $this->controller->{$action.'Action'}($request, $response ?? HttpHelper::response());
 	}
 	
-	protected function assertResponse(int $expectedCode, array $expectedBody, Response $response) {
+	protected function assertResponse(int $expectedCode, $expectedBody, Response $response) {
 		$this->assertEquals($expectedCode, $response->getStatusCode(), 'response status code');
 		$this->assertJsonStringEqualsJsonString(json_encode($expectedBody, JSON_PRETTY_PRINT), (string)$response->getBody(), 'response body');
 		$this->assertResponse($expectedCode, $expectedBody, $response);
