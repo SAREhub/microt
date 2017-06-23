@@ -59,13 +59,17 @@ abstract class ControllerTestCase extends TestCase {
 		return $this->controller->{$action.'Action'}($request, $response ?? HttpHelper::response());
 	}
 	
-	protected function assertResponse(int $expectedCode, $expectedBody, Response $response) {
-		$this->assertEquals($expectedCode, $response->getStatusCode(), 'response status code');
-		$this->assertJsonStringEqualsJsonString(json_encode($expectedBody, JSON_PRETTY_PRINT), (string)$response->getBody(), 'response body');
+	protected function assertResponseCode(int $expected, Response $response) {
+		$this->assertEquals($expected, $response->getStatusCode(), 'response status code');
 	}
 	
-	protected function assertErrorResponse(int $expectedCode, string $expectedMessage, $expectedDetails, Response $response) {
-		$this->assertResponse($expectedCode, JsonResponse::createErrorBody($expectedMessage, $expectedDetails), $response);
+	protected function assertJsonResponse(int $expectedCode, $expectedBody, Response $response) {
+		$this->assertResponseCode($expectedCode, $response);
+		$this->assertJsonStringEqualsJsonString(json_encode($expectedBody, JSON_PRETTY_PRINT), (string)$response->getBody(), 'json response body');
+	}
+	
+	protected function assertErrorJsonResponse(int $expectedCode, string $expectedMessage, $expectedDetails, Response $response) {
+		$this->assertJsonResponse($expectedCode, JsonResponse::createErrorBody($expectedMessage, $expectedDetails), $response);
 	}
 	
 }
