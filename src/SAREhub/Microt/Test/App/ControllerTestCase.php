@@ -18,9 +18,9 @@
 
 namespace SAREhub\Microt\Test\App;
 
-use JSend\JSendResponse;
 use PHPUnit\Framework\TestCase;
 use SAREhub\Microt\App\BasicController;
+use SAREhub\Microt\Util\JsonResponse;
 use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -59,22 +59,14 @@ abstract class ControllerTestCase extends TestCase {
 		return $this->controller->{$action.'Action'}($request, $response ?? HttpHelper::response());
 	}
 	
-	protected function assertSuccessResponse(int $expectedStatusCode, array $expectedData, Response $response) {
-		$this->assertResponse($expectedStatusCode, JSendResponse::success($expectedData), $response);
+	protected function assertResponse(int $expectedCode, array $expectedBody, Response $response) {
+		$this->assertEquals($expectedCode, $response->getStatusCode(), 'response status code');
+		$this->assertJsonStringEqualsJsonString(json_encode($expectedBody, JSON_PRETTY_PRINT), (string)$response->getBody(), 'response body');
+		$this->assertResponse($expectedCode, $expectedBody, $response);
 	}
 	
-	protected function assertFailResponse(int $expectedStatusCode, array $expectedData, Response $response) {
-		$this->assertResponse($expectedStatusCode, JSendResponse::fail($expectedData), $response);
-	}
-	
-	protected function assertErrorResponse(int $expectedStatusCode, string $expectedMessage, array $expectedData, Response $response) {
-		$this->assertResponse($expectedStatusCode, JSendResponse::error($expectedMessage, null, $expectedData), $response);
-	}
-	
-	protected function assertResponse(int $expectedStatusCode, JSendResponse $expectedBody, Response $response) {
-		$this->assertEquals($expectedStatusCode, $response->getStatusCode(), 'response status code');
-		$expectedBody->setEncodingOptions(JSON_PRETTY_PRINT);
-		$this->assertJsonStringEqualsJsonString($expectedBody->encode(), (string)$response->getBody(), 'response body');
+	protected function assertErrorResponse(int $expectedCode, string $expectedMessage, $expectedDetails, Response $response) {
+		$this->assertResponse($expectedCode, JsonResponse::createErrorBody($expectedMessage, $expectedDetails), $response);
 	}
 	
 }

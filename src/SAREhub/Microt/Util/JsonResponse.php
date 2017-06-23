@@ -18,7 +18,6 @@
 
 namespace SAREhub\Microt\Util;
 
-use JSend\JSendResponse;
 use Slim\Http\Response;
 
 class JsonResponse {
@@ -30,43 +29,43 @@ class JsonResponse {
 		$this->orginal = $orginal;
 	}
 	
-	public static function wrap(Response $orginalResponse): self {
-		return new self($orginalResponse);
+	public static function wrap(Response $orginal): self {
+		return new self($orginal);
 	}
 	
-	public function ok(array $data = null) {
-		return $this->success($data, 200);
+	public function ok(array $body = null) {
+		return $this->create($body, 200);
 	}
 	
-	public function created(array $data = null): Response {
-		return $this->success($data, 201);
+	public function created(array $body = null): Response {
+		return $this->create($body, 201);
 	}
 	
-	public function success(array $data = null, int $status): Response {
-		return $this->create(JSendResponse::success($data), $status);
+	public function badRequest(string $message, array $details = null) {
+		return $this->error($message, $details, 400);
 	}
 	
-	public function badRequest(array $data) {
-		return $this->fail($data, 400);
+	public function notFound(string $message, array $details = null): Response {
+		return $this->error($message, $details, 404);
 	}
 	
-	public function notFound(array $data = null): Response {
-		return $this->fail($data, 404);
+	public function internalServerError(string $message, array $details = null) {
+		return $this->error($message, $details, 500);
 	}
 	
-	public function fail(array $data, int $statusCode): Response {
-		return $this->create(JSendResponse::fail($data), $statusCode);
+	public function error(string $message, array $details = null, $statusCode): Response {
+		$body = self::createErrorBody($message, $details);
+		return $this->create($body, $statusCode);
 	}
 	
-	public function internalServerError(string $message, array $data) {
-		return $this->error($message, $data, 500);
+	public static function createErrorBody(string $message, array $details = null) {
+		return [
+		  'message' => $message,
+		  'details' => $details
+		];
 	}
 	
-	public function error(string $message, array $data = null, $statusCode): Response {
-		return $this->create(JSendResponse::error($message, null, $data), $statusCode);
-	}
-	
-	private function create(JSendResponse $json, int $status) {
-		return $this->orginal->withJson($json, $status, $this->encodingOptions);
+	private function create(array $body, int $status) {
+		return $this->orginal->withJson($body, $status, $this->encodingOptions);
 	}
 }
