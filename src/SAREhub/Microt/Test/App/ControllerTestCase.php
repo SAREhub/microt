@@ -19,9 +19,9 @@
 namespace SAREhub\Microt\Test\App;
 
 use PHPUnit\Framework\TestCase;
-use Pimple\Container;
 use SAREhub\Microt\App\BasicController;
 use SAREhub\Microt\Util\JsonResponse;
+use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 

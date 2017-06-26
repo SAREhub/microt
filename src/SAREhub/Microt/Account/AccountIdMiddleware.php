@@ -18,7 +18,7 @@
 
 namespace SAREhub\Microt\Account;
 
-use Slim\Container;
+use Pimple\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 use Slim\Route;
