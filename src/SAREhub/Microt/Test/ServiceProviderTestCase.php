@@ -19,7 +19,7 @@
 namespace SAREhub\Microt\Test;
 
 use PHPUnit\Framework\TestCase;
-use Slim\Container;
+use Pimple\Container;
 
 abstract class ServiceProviderTestCase extends TestCase {
 	

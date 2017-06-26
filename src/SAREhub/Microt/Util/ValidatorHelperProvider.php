@@ -18,9 +18,8 @@
 
 namespace SAREhub\Microt\Util;
 
-
+use Pimple\Container;
 use SAREhub\Microt\App\ServiceProvider;
-use Slim\Container;
 
 class ValidatorHelperProvider implements ServiceProvider {
 	

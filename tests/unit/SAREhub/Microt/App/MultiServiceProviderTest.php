@@ -20,7 +20,7 @@ namespace SAREhub\Microt\App;
 
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
-use Slim\Container;
+use Pimple\Container;
 
 class MultiServiceProviderTest extends TestCase {
 	

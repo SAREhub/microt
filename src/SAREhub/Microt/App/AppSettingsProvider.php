@@ -19,7 +19,7 @@
 namespace SAREhub\Microt\App;
 
 
-use Slim\Container;
+use Pimple\Container;
 
 class AppSettingsProvider implements ServiceProvider {
 	
