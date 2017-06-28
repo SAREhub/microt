@@ -42,6 +42,7 @@ class LoggerProvider implements ServiceProvider {
 		$output = new StreamHandler('php://stdout');
 		$formatter = new StandardLogFormatter();
 		$output->setFormatter($formatter);
+		return $output;
 	}
 	
 	protected function createProcessors(Container $c): array {
@@ -53,6 +54,6 @@ class LoggerProvider implements ServiceProvider {
 			return new RequestIdProcessor($c['request']->getHeader('X-Request-ID')[0]);
 		}
 		
-		new RequestIdProcessor(0);
+		return new RequestIdProcessor(0);
 	}
 }
