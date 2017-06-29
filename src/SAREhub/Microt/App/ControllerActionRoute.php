@@ -29,11 +29,7 @@ class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable {
 	private $action;
 	private $httpMethod;
 	private $pattern = '';
-	private $middlewareInjector;
-	
-	public function __construct() {
-		$this->middlewareInjector = new NullRouteMiddlewareInjector();
-	}
+	private $middlewareInjector = null;
 	
 	public static function post(string $pattern = '', string $action): ControllerActionRoute {
 		return self::route()->httpMethod('POST')->pattern($pattern)->action($action);
@@ -108,22 +104,31 @@ class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable {
 		return $this->middlewareInjector;
 	}
 	
+	public function hasMiddlewareInjector(): bool {
+		return $this->middlewareInjector !== null;
+	}
+	
 	public function getControllerActionString(): string {
 		return $this->getController().':'.$this->getAction().self::ACTION_POSTFIX;
 	}
 	
 	public function injectTo(App $app) {
 		$r = $app->map([$this->getHttpMethod()], $this->getPattern(), $this->getControllerActionString());
-		$this->getMiddlewareInjector()->injectTo($r);
+		if ($this->hasMiddlewareInjector()) {
+			$this->getMiddlewareInjector()->setContainer($app->getContainer());
+			$this->getMiddlewareInjector()->injectTo($r);
+		}
 	}
 	
 	public function jsonSerialize() {
+		$middlewareInjector = $this->getMiddlewareInjector();
 		return [
 		  'httpMethod' => $this->getHttpMethod(),
 		  'pattern' => $this->getPattern(),
 		  'controller' => $this->getController(),
 		  'action' => $this->getAction(),
-		  'middlewareInjector' => $this->getMiddlewareInjector() instanceof \JsonSerializable
+		  'middlewareInjector' => $middlewareInjector instanceof \JsonSerializable ?
+			$middlewareInjector : get_class($middlewareInjector)
 		];
 	}
 }

@@ -21,6 +21,7 @@ namespace SAREhub\Microt\App;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 use Slim\App;
+use Slim\Container;
 use Slim\Interfaces\RouteInterface;
 
 class ControllerActionRouteTest extends TestCase {
@@ -72,8 +73,11 @@ class ControllerActionRouteTest extends TestCase {
 		  ->middlewareInjector($middlewareInjector);
 		
 		$app = \Mockery::mock(App::class);
+		$container = new Container();
+		$app->shouldReceive('getContainer')->andReturn($container);
 		$route = \Mockery::mock(RouteInterface::class);
 		$app->shouldReceive('map')->with(['m'], 'p', 'c:bAction')->andReturn($route)->once();
+		$middlewareInjector->shouldReceive('setContainer')->with($container)->once();
 		$middlewareInjector->shouldReceive('injectTo')->with($route)->once();
 		$r->injectTo($app);
 	}

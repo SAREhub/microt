@@ -18,9 +18,12 @@
 
 namespace SAREhub\Microt\App;
 
+use Pimple\Container;
 use Slim\Interfaces\RouteInterface;
 
 interface RouteMiddlewareInjector {
 	
 	public function injectTo(RouteInterface $route);
+	
+	public function setContainer(Container $c);
 }
