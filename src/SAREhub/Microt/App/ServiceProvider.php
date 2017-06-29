@@ -20,8 +20,9 @@ namespace SAREhub\Microt\App;
 
 
 use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 
-interface ServiceProvider {
+interface ServiceProvider extends ServiceProviderInterface {
 	
 	public function register(Container $c);
 }
