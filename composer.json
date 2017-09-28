@@ -15,14 +15,19 @@
   "require-dev": {
     "phpunit/phpunit": "6.*",
     "mockery/mockery": "^0.9",
-    "guzzlehttp/guzzle": "^6.2"
+    "guzzlehttp/guzzle": "^6.2",
+    "tuupola/slim-basic-auth": "^2.2"
   },
   "require": {
     "php": "^7.1",
     "sarehub/commons": "0.6.*",
     "slim/slim-skeleton": "^3.0",
     "monolog/monolog": "1.*",
-    "respect/validation": "^1.1"
+    "respect/validation": "^1.1",
+    "sarehub/dockerutil": "^0.1.1"
+  },
+  "suggest": {
+    "tuupola/slim-basic-auth": "Allows to use Basic Auth providers."
   },
   "autoload": {
     "psr-4": {
