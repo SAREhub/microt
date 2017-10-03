@@ -27,7 +27,7 @@ class AppLoggerProvider implements ServiceProvider
                 $handler->setLevel(EnvironmentHelper::getVar(self::LOGGING_LEVEL, "debug"));
             }
         }
-        $c[self::class] = $logger;
+        $c['logger'] = $c[self::class] = $logger;
     }
 
     protected function createHandlers(Container $c): array
