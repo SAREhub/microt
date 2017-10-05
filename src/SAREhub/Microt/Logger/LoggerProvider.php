@@ -24,6 +24,10 @@ use Pimple\Container;
 use SAREhub\Microt\App\AppBootstrap;
 use SAREhub\Microt\App\ServiceProvider;
 
+/**
+ * Use AppLoggerProvider instead
+ * @deprecated
+ */
 class LoggerProvider implements ServiceProvider {
 	
 	const ENTRY = 'logger';
