@@ -25,8 +25,7 @@ use SAREhub\Microt\App\AppBootstrap;
 use SAREhub\Microt\App\ServiceProvider;
 
 /**
- * Use AppLoggerProvider instead
- * @deprecated
+ * @deprecated Use AppLoggerProvider instead
  */
 class LoggerProvider implements ServiceProvider {
 	

@@ -20,11 +20,11 @@
   },
   "require": {
     "php": "^7.1",
-    "sarehub/commons": "0.6.*",
+    "sarehub/commons": "0.7.*",
     "slim/slim-skeleton": "^3.0",
     "monolog/monolog": "1.*",
     "respect/validation": "^1.1",
-    "sarehub/dockerutil": "^0.1.1"
+    "sarehub/dockerutil": "^0.2"
   },
   "suggest": {
     "tuupola/slim-basic-auth": "Allows to use Basic Auth providers."
