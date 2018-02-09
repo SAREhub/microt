@@ -15,7 +15,10 @@ use SAREhub\Microt\App\ServiceProvider;
 
 class AppLoggerProvider implements ServiceProvider
 {
-    const LOGGING_LEVEL = "APP_LOGGING_LEVEL";
+    const ENV_LOGGING_LEVEL = "APP_LOGGING_LEVEL";
+    const ENV_LOGGING_STREAM = "APP_LOGGING_STREAM";
+
+    const DEFAULT_LOGGING_LEVEL = "debug";
 
     public function register(Container $c)
     {
@@ -24,10 +27,10 @@ class AppLoggerProvider implements ServiceProvider
         $logger = new Logger($c[AppBootstrap::APP_NAME_ENTRY], $handlers, $processors);
         foreach ($logger->getHandlers() as $handler) {
             if ($handler instanceof AbstractHandler) {
-                $handler->setLevel(EnvironmentHelper::getVar(self::LOGGING_LEVEL, "debug"));
+                $handler->setLevel(EnvironmentHelper::getVar(self::ENV_LOGGING_LEVEL, self::DEFAULT_LOGGING_LEVEL));
             }
         }
-        $c[LoggerProvider::ENTRY] = $c[self::class] = $logger;
+        $c[self::class] = $logger;
     }
 
     protected function createHandlers(Container $c): array
@@ -35,9 +38,9 @@ class AppLoggerProvider implements ServiceProvider
         return [$this->createStdoutHandler($c)];
     }
 
-    protected function createStdoutHandler(Container $c): StreamHandler
+    protected function createStdoutHandler(): StreamHandler
     {
-        $output = new StreamHandler('php://stdout');
+        $output = new StreamHandler(EnvironmentHelper::getVar(self::ENV_LOGGING_STREAM, "php://stdout"));
         $formatter = new StandardLogFormatter();
         $output->setFormatter($formatter);
         return $output;
