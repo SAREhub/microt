@@ -19,6 +19,7 @@
 namespace SAREhub\Microt\App;
 
 use Pimple\Container;
+use SAREhub\Microt\Logger\AppLoggerProvider;
 use SAREhub\Microt\Logger\LoggerProvider;
 use SAREhub\Microt\Util\JsonResponse;
 
@@ -30,7 +31,7 @@ class ErrorHandlerProvider implements ServiceProvider {
 	public function register(Container $c) {
 		$c[self::RUNTIME_ERROR_HANDLER_ENTRY] = $c[self::ERROR_HANDLER] = function ($c) {
 			return function ($rq, $resp, \Throwable $e) use ($c) {
-                $c[LoggerProvider::ENTRY]->error($e->getMessage(), ['exception' => $e]);
+                $c[AppLoggerProvider::class]->error($e->getMessage(), ['exception' => $e]);
 				return JsonResponse::wrap($c['response'])->internalServerError('exception occur');
 			};
 		};
