@@ -20,7 +20,6 @@ namespace SAREhub\Microt\App;
 
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
-use SAREhub\Microt\MiddlewareInjector;
 use Slim\App;
 
 class MultiMiddlewareInjectorTest extends TestCase {

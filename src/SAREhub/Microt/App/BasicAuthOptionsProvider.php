@@ -3,36 +3,41 @@
 namespace SAREhub\Microt\App;
 
 
-use Pimple\Container;
 use SAREhub\Commons\Misc\EnvironmentHelper;
+use SAREhub\Commons\Misc\InvokableProvider;
 use SAREhub\DockerUtil\Secret\SecretHelper;
 use SAREhub\Microt\Util\JsonResponse;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class BasicAuthOptionsProvider implements ServiceProvider
+class BasicAuthOptionsProvider extends InvokableProvider
 {
     const ENV_API_ROOT_PASSWORD_SECRET = 'API_ROOT_PASSWORD_SECRET';
 
-    public function register(Container $c)
+    /**
+     * @var SecretHelper
+     */
+    private $secretHelper;
+
+    public function __construct(SecretHelper $secretHelper)
     {
-        $c[self::class] = [
+        $this->secretHelper = $secretHelper;
+    }
+
+    public function get()
+    {
+        return [
             "secure" => false,
-            "users" => $this->getAuthUsers($c),
+            "users" => $this->getAuthUsers(),
             "error" => $this->getErrorCallback()
         ];
     }
 
-    private function getAuthUsers(Container $c): array
+    private function getAuthUsers(): array
     {
         return [
-            "root" => $this->getSecretHelper($c)->getValue(EnvironmentHelper::getVar(self::ENV_API_ROOT_PASSWORD_SECRET))
+            "root" => $this->secretHelper->getValue(EnvironmentHelper::getVar(self::ENV_API_ROOT_PASSWORD_SECRET))
         ];
-    }
-
-    private function getSecretHelper(Container $c): SecretHelper
-    {
-        return $c[SecretHelperProvider::class];
     }
 
     private function getErrorCallback(): callable

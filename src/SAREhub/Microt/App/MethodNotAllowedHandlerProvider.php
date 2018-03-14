@@ -19,20 +19,20 @@
 namespace SAREhub\Microt\App;
 
 
-use Pimple\Container;
+use SAREhub\Commons\Misc\InvokableProvider;
 use SAREhub\Microt\Util\JsonResponse;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
-class MethodNotAllowedHandlerProvider implements ServiceProvider {
-	
-	const ENTRY = 'notAllowedHandler';
-	
-	public function register(Container $c) {
-		$c[self::ENTRY] = function ($c) {
-			return function ($rq, $resp, $methods) use ($c) {
-				return JsonResponse::wrap($c['response'])
-				  ->error('method not allowed', ['allowedMethods' => $methods], 405)
-				  ->withHeader('Allow', implode(', ', $methods));
-			};
-		};
-	}
+class MethodNotAllowedHandlerProvider extends InvokableProvider
+{
+
+    public function get()
+    {
+        return function (Request $rq, Response $resp, $methods) {
+            return JsonResponse::wrap($resp)
+                ->error('method not allowed', ['allowedMethods' => $methods], 405)
+                ->withHeader('Allow', implode(', ', $methods));
+        };
+    }
 }

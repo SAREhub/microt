@@ -19,60 +19,115 @@
 namespace SAREhub\Microt\App;
 
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
-use Mockery\Mock;
+use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
-use Slim\App;
-use Slim\Container;
 
-class AppBootstrapTest extends TestCase {
-	
-	use MockeryPHPUnitIntegration;
-	
-	/**
-	 * @var Mock
-	 */
-	private $app;
-	
-	private $container;
-	
-	/**
-	 * @var Mock | ServiceProvider
-	 */
-	private $serviceProvider;
-	
-	/**
-	 * @var Mock | MiddlewareInjector
-	 */
-	private $middlewareInjector;
-	
-	/**
-	 * @var AppBootstrap
-	 */
-	private $bootstrap;
-	
-	protected function setUp() {
-		$this->app = \Mockery::mock(App::class)->shouldIgnoreMissing();
-		$this->container = new Container();
-		$this->app->shouldReceive('getContainer')->andReturn($this->container);
-		$this->serviceProvider = \Mockery::mock(ServiceProvider::class)->shouldIgnoreMissing();
-		$this->middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
-		$this->bootstrap = new AppBootstrap($this->app);
-		$this->bootstrap->setServiceProvider($this->serviceProvider);
-		$this->bootstrap->setMidlewareInjector($this->middlewareInjector);
-	}
-	
-	public function testRunThenServiceProviderRegister() {
-		$this->serviceProvider->shouldReceive('register')->with($this->container)->once();
-		$this->bootstrap->run();
-	}
-	
-	public function testRunThenMiddlewareInjector() {
-		$this->middlewareInjector->shouldReceive('injectTo')->with($this->app)->once();
-		$this->bootstrap->run();
-	}
-	
-	public function testRunThenAppRun() {
-		$this->app->shouldReceive('run')->once();
-		$this->bootstrap->run();
-	}
+class AppBootstrapTest extends TestCase
+{
+
+    use MockeryPHPUnitIntegration;
+
+    /**
+     * @var MockInterface | ServiceAppFactory
+     */
+    private $appFactory;
+
+    /**
+     * @var AppBootstrap
+     */
+    private $bootstrap;
+
+    protected function setUp()
+    {
+        $this->appFactory = \Mockery::mock(ServiceAppFactory::class);
+        $this->bootstrap = new AppBootstrap($this->appFactory);
+    }
+
+    public function testRunThenAppFactoryCreate()
+    {
+        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
+        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
+
+        $app = \Mockery::mock(ServiceApp::class)->shouldIgnoreMissing();
+        $this->appFactory->expects("create")->withArgs([$containerConfigurator])->andReturn($app);
+
+        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+    }
+
+    public function testRunThenMiddlewareInjector()
+    {
+        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
+        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class);
+
+        $app = \Mockery::mock(ServiceApp::class)->shouldIgnoreMissing();
+        $this->appFactory->shouldIgnoreMissing($app);
+
+        $middlewareInjector->expects("injectTo")->withArgs([$app]);
+
+        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+    }
+
+    public function testRunThenAppRun()
+    {
+        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
+        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
+
+        $app = \Mockery::mock(ServiceApp::class);
+        $this->appFactory->shouldIgnoreMissing($app);
+
+        $app->expects("run");
+
+        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+    }
+
+    public function testRunWhenAppFactoryCreateThrowsExceptionThenRespondWithInternalError()
+    {
+        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
+        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
+
+        $basicApp = \Mockery::mock(ServiceApp::class);
+        $exception = new \Exception("error");
+        $this->appFactory->expects("create")->withArgs([$containerConfigurator])->andThrow($exception);
+        $this->appFactory->expects("createBasic")->andReturn($basicApp);
+
+        $basicApp->expects("respondWithInternalErrorResponse")->withArgs([$exception]);
+
+        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+    }
+
+    public function testRunWhenMiddlewareInjectorInjectToThrowsExceptionThenRespondWithInternalError()
+    {
+        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
+        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class);
+
+        $app = \Mockery::mock(ServiceApp::class);
+        $this->appFactory->expects("create")->withArgs([$containerConfigurator])->andReturn($app);
+
+        $exception = new \Exception("error");
+        $middlewareInjector->expects("injectTo")->withArgs([$app])->andThrow($exception);
+
+        $basicApp = \Mockery::mock(ServiceApp::class);
+        $this->appFactory->expects("createBasic")->andReturn($basicApp);
+        $basicApp->expects("respondWithInternalErrorResponse")->withArgs([$exception]);
+
+        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+    }
+
+    public function testRunWhenAppRunThrowsExceptionThenRespondWithInternalError()
+    {
+        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
+        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
+
+        $app = \Mockery::mock(ServiceApp::class);
+        $this->appFactory->expects("create")->withArgs([$containerConfigurator])->andReturn($app);
+
+        $exception = new \Exception("error");
+        $app->expects("run")->withArgs([])->andThrow($exception);
+        $basicApp = \Mockery::mock(ServiceApp::class);
+        $this->appFactory->expects("createBasic")->andReturn($basicApp);
+
+        $basicApp->expects("respondWithInternalErrorResponse")->withArgs([$exception]);
+
+        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+    }
 }

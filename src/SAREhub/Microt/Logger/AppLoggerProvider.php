@@ -10,51 +10,54 @@ use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Pimple\Container;
 use SAREhub\Commons\Misc\EnvironmentHelper;
-use SAREhub\Microt\App\AppBootstrap;
-use SAREhub\Microt\App\ServiceProvider;
+use SAREhub\Commons\Misc\InvokableProvider;
 
-class AppLoggerProvider implements ServiceProvider
+class AppLoggerProvider extends InvokableProvider
 {
     const ENV_LOGGING_LEVEL = "APP_LOGGING_LEVEL";
-    const ENV_LOGGING_STREAM = "APP_LOGGING_STREAM";
-
     const DEFAULT_LOGGING_LEVEL = "debug";
 
-    public function register(Container $c)
+    const ENV_LOGGING_STREAM = "APP_LOGGING_STREAM";
+    const DEFAULT_LOGGING_STREAM = "php://stdout";
+
+    const LOGGER_NAME = "app";
+
+    public function get()
     {
-        $handlers = $this->createHandlers($c);
-        $processors = $this->createProcessors($c);
-        $logger = new Logger($c[AppBootstrap::APP_NAME_ENTRY], $handlers, $processors);
+        $handlers = $this->createHandlers();
+        $processors = $this->createProcessors();
+        $logger = new Logger(self::LOGGER_NAME, $handlers, $processors);
+        $loggingLevel = EnvironmentHelper::getVar(self::ENV_LOGGING_LEVEL, self::DEFAULT_LOGGING_LEVEL);
         foreach ($logger->getHandlers() as $handler) {
             if ($handler instanceof AbstractHandler) {
-                $handler->setLevel(EnvironmentHelper::getVar(self::ENV_LOGGING_LEVEL, self::DEFAULT_LOGGING_LEVEL));
+                $handler->setLevel($loggingLevel);
             }
         }
-        $c[self::class] = $logger;
+
+        return $logger;
     }
 
-    protected function createHandlers(Container $c): array
+    private function createHandlers(): array
     {
-        return [$this->createStdoutHandler($c)];
+        return [$this->createStdoutHandler()];
     }
 
-    protected function createStdoutHandler(): StreamHandler
+    private function createStdoutHandler(): StreamHandler
     {
-        $output = new StreamHandler(EnvironmentHelper::getVar(self::ENV_LOGGING_STREAM, "php://stdout"));
-        $formatter = new StandardLogFormatter();
-        $output->setFormatter($formatter);
+        $stream = EnvironmentHelper::getVar(self::ENV_LOGGING_STREAM, self::DEFAULT_LOGGING_STREAM);
+        $output = new StreamHandler($stream);
+        $output->setFormatter(new StandardLogFormatter());
         return $output;
     }
 
-    protected function createProcessors(Container $c): array
+    private function createProcessors(): array
     {
         return [
-            $this->createRequestIdProcessor($c),
             new PsrLogMessageProcessor()
         ];
     }
 
-    protected function createRequestIdProcessor(Container $c): RequestIdProcessor
+    private function createRequestIdProcessor(Container $c): RequestIdProcessor
     {
         if ($c['request']->hasHeader('X-Request-ID')) {
             return new RequestIdProcessor($c['request']->getHeader('X-Request-ID')[0]);

@@ -107,15 +107,20 @@ class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable {
 	public function hasMiddlewareInjector(): bool {
 		return $this->middlewareInjector !== null;
 	}
-	
-	public function getControllerActionString(): string {
-		return $this->getController().':'.$this->getAction().self::ACTION_POSTFIX;
-	}
+
+    public function getControllerActionCallable(): array
+    {
+        return [$this->getController(), $this->getControllerActionMethodString()];
+    }
+
+    public function getControllerActionMethodString(): string
+    {
+        return $this->getAction() . self::ACTION_POSTFIX;
+    }
 	
 	public function injectTo(App $app) {
-		$r = $app->map([$this->getHttpMethod()], $this->getPattern(), $this->getControllerActionString());
+        $r = $app->map([$this->getHttpMethod()], $this->getPattern(), $this->getControllerActionCallable());
 		if ($this->hasMiddlewareInjector()) {
-			$this->getMiddlewareInjector()->setContainer($app->getContainer());
 			$this->getMiddlewareInjector()->injectTo($r);
 		}
 	}

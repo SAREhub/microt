@@ -20,43 +20,16 @@ namespace SAREhub\Microt\Test\App;
 
 use PHPUnit\Framework\TestCase;
 use SAREhub\Microt\App\BasicController;
+use SAREhub\Microt\App\Controller;
 use SAREhub\Microt\Util\JsonResponse;
-use Slim\Container;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 abstract class ControllerTestCase extends TestCase {
-	
-	/**
-	 * @var Container
-	 */
-	protected $container;
-	
-	/**
-	 * @var BasicController
-	 */
-	protected $controller;
-	
-	protected function setUp() {
-		$controllerClass = $this->getControllerClass();
-		$this->container = new Container();
-		$this->controller = new $controllerClass($this->container);
-	}
-	
-	protected abstract function getControllerClass(): string;
-	
-	protected function injectDeps(array $deps) {
-		foreach ($deps as $name => $dep) {
-			$this->container[$name] = $dep;
-		}
-	}
-	
-	protected function getContainer(): Container {
-		return $this->container;
-	}
-	
-	protected function callAction(string $action, Request $request, Response $response = null): Response {
-		return $this->controller->{$action.'Action'}($request, $response ?? HttpHelper::response());
+
+    protected function callAction(Controller $controller, string $action, Request $request, Response $response = null): Response
+    {
+        return $controller->{$action . 'Action'}($request, $response ?? HttpHelper::response());
 	}
 	
 	protected function assertResponseCode(int $expected, Response $response) {

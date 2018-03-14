@@ -7,9 +7,15 @@ use Slim\Middleware\HttpBasicAuthentication;
 
 class BasicAuthMiddlewareInjector implements MiddlewareInjector
 {
+    private $authOptions;
+
+    public function __construct(array $authOptions)
+    {
+        $this->authOptions = $authOptions;
+    }
+
     public function injectTo(App $app)
     {
-        $options = $app->getContainer()->get(BasicAuthOptionsProvider::class);
-        $app->add(new HttpBasicAuthentication($options));
+        $app->add(new HttpBasicAuthentication($this->authOptions));
     }
 }

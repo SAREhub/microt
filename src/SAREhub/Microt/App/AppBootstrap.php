@@ -18,52 +18,29 @@
 
 namespace SAREhub\Microt\App;
 
-use Pimple\Container;
-use Slim\App;
 
-class AppBootstrap {
-	
-	const APP_NAME_ENTRY = 'app.name';
-	
-	/**
-	 * @var App
-	 */
-	private $app;
-	
-	/**
-	 * @var ServiceProvider
-	 */
-	private $serviceProvider;
-	
-	/**
-	 * @var MiddlewareInjector
-	 */
-	private $middlewareInjector;
-	
-	public function __construct(App $app = null) {
-		$this->app = $app ?? new App();
-	}
-	
-	public function setAppName(string $name) {
-		$this->getContainer()[self::APP_NAME_ENTRY] = $name;
-	}
-	
-	public function setServiceProvider(ServiceProvider $provider) {
-		$this->serviceProvider = $provider;
-	}
-	
-	public function setMidlewareInjector(MiddlewareInjector $injector) {
-		$this->middlewareInjector = $injector;
-	}
-	
-	public function run() {
-		$this->serviceProvider->register($this->getContainer());
-		$this->middlewareInjector->injectTo($this->app);
-		$this->app->run();
-	}
-	
-	private function getContainer(): Container {
-		return $this->app->getContainer();
-	}
-	
+class AppBootstrap
+{
+    /**
+     * @var ServiceAppFactory
+     */
+    private $appFactory;
+
+    public function __construct(ServiceAppFactory $appFactory)
+    {
+        $this->appFactory = $appFactory;
+    }
+
+    public function run(ContainerConfigurator $containerConfigurator, MiddlewareInjector $injector)
+    {
+        try {
+            $app = $this->appFactory->create($containerConfigurator);
+            $injector->injectTo($app);
+            $app->run();
+        } catch (\Throwable $e) {
+            $basicApp = $this->appFactory->createBasic();
+            $basicApp->respondWithInternalErrorResponse($e);
+        }
+
+    }
 }

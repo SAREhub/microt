@@ -2,17 +2,8 @@
 
 namespace SAREhub\Microt\Account;
 
-use Pimple\Container;
-
 abstract class ServiceAccountRegistry
 {
-
-    private $container;
-
-    public function __construct(Container $container)
-    {
-        $this->container = $container;
-    }
 
     public function register(string $accountId)
     {
@@ -36,8 +27,4 @@ abstract class ServiceAccountRegistry
 
     public abstract function getList(): array;
 
-    public function getContainer(): Container
-    {
-        return $this->container;
-    }
 }
