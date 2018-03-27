@@ -36,7 +36,7 @@ class ServiceApp extends App
 
     public function getErrorHandler(): callable
     {
-        return $this->errorHandler;
+        return $this->getContainer()->get("errorHandler");
     }
 
     public function getRequest(): Request
