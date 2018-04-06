@@ -46,7 +46,9 @@ class AppLoggerProvider extends InvokableProvider
     {
         $stream = EnvironmentHelper::getVar(self::ENV_LOGGING_STREAM, self::DEFAULT_LOGGING_STREAM);
         $output = new StreamHandler($stream);
-        $output->setFormatter(new StandardLogFormatter());
+        $formatter = new StandardLogFormatter();
+        $formatter->includeStacktraces(true);
+        $output->setFormatter($formatter);
         return $output;
     }
 
