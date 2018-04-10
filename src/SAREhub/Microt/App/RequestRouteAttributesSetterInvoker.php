@@ -28,7 +28,7 @@ class RequestRouteAttributesSetterInvoker implements InvocationStrategyInterface
         array $routeArguments
     )
     {
-        $request = $request->withAttributes($routeArguments);
+        $request = $request->withAttributes(array_merge($routeArguments, $request->getAttributes()));
         return ($this->nextInvoker)($callable, $request, $response, $routeArguments);
     }
 }
