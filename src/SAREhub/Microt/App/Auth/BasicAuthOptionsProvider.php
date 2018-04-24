@@ -1,6 +1,6 @@
 <?php
 
-namespace SAREhub\Microt\App;
+namespace SAREhub\Microt\App\Auth;
 
 
 use SAREhub\Commons\Misc\EnvironmentHelper;
@@ -42,8 +42,8 @@ class BasicAuthOptionsProvider extends InvokableProvider
 
     private function getErrorCallback(): callable
     {
-        return function (Request $req, Response $resp, array $arguments) {
-            return JsonResponse::wrap($resp)->error($arguments['message'], [], 401);
+        return function (Request $request, Response $response, array $arguments) {
+            return JsonResponse::wrap($response)->error($arguments['message'], [], 401);
         };
     }
 }

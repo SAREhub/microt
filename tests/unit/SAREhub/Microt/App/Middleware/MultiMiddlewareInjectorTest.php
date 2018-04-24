@@ -16,25 +16,23 @@
  *
  */
 
-namespace SAREhub\Microt\App;
+namespace SAREhub\Microt\App\Middleware;
 
-
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use PHPUnit\Framework\TestCase;
 use Slim\App;
 
-class MultiMiddlewareInjector implements MiddlewareInjector {
-	
-	/**
-	 * @var MiddlewareInjector[]
-	 */
-	private $injectors;
-	
-	public function __construct(array $injectors) {
-		$this->injectors = $injectors;
-	}
-	
-	public function injectTo(App $app) {
-		foreach ($this->injectors as $i) {
-			$i->injectTo($app);
-		}
-	}
+class MultiMiddlewareInjectorTest extends TestCase
+{
+
+    use MockeryPHPUnitIntegration;
+
+    public function testInjectTo()
+    {
+        $app = \Mockery::mock(App::class);
+        $injector = \Mockery::mock(MiddlewareInjector::class);
+        $injector->expects('injectTo')->withArgs([$app]);
+        $multiInjector = new MultiMiddlewareInjector([$injector]);
+        $multiInjector->injectTo($app);
+    }
 }

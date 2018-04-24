@@ -4,7 +4,7 @@ namespace SAREhub\Microt\Account;
 
 
 use Pimple\Container;
-use SAREhub\Microt\App\MiddlewareInjector;
+use SAREhub\Microt\App\Middleware\MiddlewareInjector;
 use Slim\App;
 
 class AccountIdMiddlewareInjector implements MiddlewareInjector

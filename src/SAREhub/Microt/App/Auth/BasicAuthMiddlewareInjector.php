@@ -1,12 +1,16 @@
 <?php
 
-namespace SAREhub\Microt\App;
+namespace SAREhub\Microt\App\Auth;
 
+use SAREhub\Microt\App\Middleware\MiddlewareInjector;
 use Slim\App;
 use Slim\Middleware\HttpBasicAuthentication;
 
 class BasicAuthMiddlewareInjector implements MiddlewareInjector
 {
+    /**
+     * @var array
+     */
     private $authOptions;
 
     public function __construct(array $authOptions)
