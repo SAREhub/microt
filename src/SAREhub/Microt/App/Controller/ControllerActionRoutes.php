@@ -5,14 +5,30 @@ namespace SAREhub\Microt\App\Controller;
 
 use SAREhub\Microt\App\Middleware\MiddlewareInjector;
 use Slim\App;
+use Slim\Interfaces\RouteGroupInterface;
 
 class ControllerActionRoutes implements MiddlewareInjector, \JsonSerializable
 {
 
+    /**
+     * @var string
+     */
     private $baseUri;
+
+    /**
+     * @var string
+     */
     private $controllerClass;
 
+    /**
+     * @var ControllerActionRoute[]
+     */
     private $routes = [];
+
+    /**
+     * @var callable[]
+     */
+    private $middlewares = [];
 
     public function __construct(string $baseUri, string $controllerClass)
     {
@@ -68,10 +84,34 @@ class ControllerActionRoutes implements MiddlewareInjector, \JsonSerializable
         return $this;
     }
 
+    public function addMiddleware(callable $middleware): ControllerActionRoutes
+    {
+        $this->middlewares[] = $middleware;
+        return $this;
+    }
+
     public function injectTo(App $app)
     {
-        foreach ($this->getRoutes() as $route) {
-            $route->injectTo($app);
+        $routeGroup = $this->injectRoutes($app);
+        $this->injectMiddlewares($routeGroup);
+    }
+
+    private function injectRoutes(App $app): RouteGroupInterface
+    {
+        $routes = $this->getRoutes();
+        $routeGroup = $app->group($this->baseUri, function () use ($routes) {
+            foreach ($routes as $route) {
+                /** @var App $this */
+                $route->injectTo($this);
+            }
+        });
+        return $routeGroup;
+    }
+
+    private function injectMiddlewares(RouteGroupInterface $routeGroup)
+    {
+        foreach ($this->getMiddlewares() as $middleware) {
+            $routeGroup->add($middleware);
         }
     }
 
@@ -93,12 +133,29 @@ class ControllerActionRoutes implements MiddlewareInjector, \JsonSerializable
         return $this->routes;
     }
 
+    /**
+     * @return callable[]
+     */
+    public function getMiddlewares(): array
+    {
+        return $this->middlewares;
+    }
+
     public function jsonSerialize()
     {
         return [
-            'baseUri' => $this->getBaseUri(),
-            'controller' => $this->getController(),
-            'routes' => $this->getRoutes()
+            "baseUri" => $this->getBaseUri(),
+            "controller" => $this->getController(),
+            "routes" => $this->getRoutes(),
+            "middlewares" => $this->jsonSerializeMiddlewares()
         ];
+    }
+
+    private function jsonSerializeMiddlewares(): array
+    {
+        $json = [];
+        foreach ($this->getMiddlewares() as $middleware) {
+            $json[] = $middleware instanceof \JsonSerializable ? $middleware : get_class($middleware);
+        }
     }
 }

@@ -49,22 +49,38 @@ class ControllerActionRouteTest extends TestCase
         $this->assertEquals(['c', 'bAction'], $r->getControllerActionCallable());
     }
 
-
-    public function testInjectTo()
+    public function testInjectToWhenHasMiddleware()
     {
-        $middlewareInjector = \Mockery::mock(RouteMiddlewareInjector::class);
+        $middleware = function () {
+        };
+
         $actionRoute = ControllerActionRoute::route()
             ->httpMethod('m')
             ->pattern('p')
             ->controller('c')
             ->action('b')
-            ->middlewareInjector($middlewareInjector);
-
+            ->addMiddleware($middleware);
         $app = \Mockery::mock(App::class);
         $route = \Mockery::mock(RouteInterface::class);
 
         $app->expects('map')->withArgs([['m'], 'p', ["c", "bAction"]])->andReturn($route);
-        $middlewareInjector->expects('injectTo')->withArgs([$route]);
+        $route->expects("add")->withArgs([$middleware]);
+
+        $actionRoute->injectTo($app);
+    }
+
+    public function testInjectToWhenHasNotMiddleware()
+    {
+        $actionRoute = ControllerActionRoute::route()
+            ->httpMethod('m')
+            ->pattern('p')
+            ->controller('c')
+            ->action('b');
+        $app = \Mockery::mock(App::class);
+        $route = \Mockery::mock(RouteInterface::class);
+
+        $app->expects('map')->withArgs([['m'], 'p', ["c", "bAction"]])->andReturn($route);
+        $route->expects("add")->never();
 
         $actionRoute->injectTo($app);
     }

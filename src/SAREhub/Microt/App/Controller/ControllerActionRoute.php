@@ -12,38 +12,57 @@ class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable
 {
     const ACTION_POSTFIX = 'Action';
 
+    /**
+     * @var string
+     */
     private $controllerClass;
-    private $action;
-    private $httpMethod;
-    private $pattern = '';
-    private $middlewareInjector = null;
 
-    public static function post(string $pattern = '', string $action): ControllerActionRoute
+    /**
+     * @var string
+     */
+    private $action;
+
+    /**
+     * @var string
+     */
+    private $httpMethod;
+
+    /**
+     * @var string
+     */
+    private $pattern = '';
+
+    /**
+     * @var callable[]
+     */
+    private $middlewares = [];
+
+    public static function post(string $pattern, string $action): ControllerActionRoute
     {
         return self::route()->httpMethod('POST')->pattern($pattern)->action($action);
     }
 
-    public static function get(string $pattern = '', string $action): ControllerActionRoute
+    public static function get(string $pattern, string $action): ControllerActionRoute
     {
         return self::route()->httpMethod('GET')->pattern($pattern)->action($action);
     }
 
-    public static function put(string $pattern = '', string $action): ControllerActionRoute
+    public static function put(string $pattern, string $action): ControllerActionRoute
     {
         return self::route()->httpMethod('PUT')->pattern($pattern)->action($action);
     }
 
-    public static function patch(string $pattern = '', string $action): ControllerActionRoute
+    public static function patch(string $pattern, string $action): ControllerActionRoute
     {
         return self::route()->httpMethod('PATCH')->pattern($pattern)->action($action);
     }
 
-    public static function delete(string $pattern = '', string $action): ControllerActionRoute
+    public static function delete(string $pattern, string $action): ControllerActionRoute
     {
         return self::route()->httpMethod('DELETE')->pattern($pattern)->action($action);
     }
 
-    public static function options(string $pattern = '', string $action): ControllerActionRoute
+    public static function options(string $pattern, string $action): ControllerActionRoute
     {
         return self::route()->httpMethod('OPTIONS')->pattern($pattern)->action($action);
     }
@@ -77,9 +96,9 @@ class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable
         return $this;
     }
 
-    public function middlewareInjector(RouteMiddlewareInjector $injector): ControllerActionRoute
+    public function addMiddleware(callable $middleware): ControllerActionRoute
     {
-        $this->middlewareInjector = $injector;
+        $this->middlewares[] = $middleware;
         return $this;
     }
 
@@ -103,14 +122,9 @@ class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable
         return $this->pattern;
     }
 
-    public function getMiddlewareInjector(): RouteMiddlewareInjector
+    public function getMiddlewares(): array
     {
-        return $this->middlewareInjector;
-    }
-
-    public function hasMiddlewareInjector(): bool
-    {
-        return $this->middlewareInjector !== null;
+        return $this->middlewares;
     }
 
     public function getControllerActionCallable(): array
@@ -126,21 +140,27 @@ class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable
     public function injectTo(App $app)
     {
         $r = $app->map([$this->getHttpMethod()], $this->getPattern(), $this->getControllerActionCallable());
-        if ($this->hasMiddlewareInjector()) {
-            $this->getMiddlewareInjector()->injectTo($r);
+        foreach ($this->getMiddlewares() as $middleware) {
+            $r->add($middleware);
         }
     }
 
     public function jsonSerialize()
     {
-        $middlewareInjector = $this->getMiddlewareInjector();
         return [
             'httpMethod' => $this->getHttpMethod(),
             'pattern' => $this->getPattern(),
             'controller' => $this->getController(),
             'action' => $this->getAction(),
-            'middlewareInjector' => $middlewareInjector instanceof \JsonSerializable ?
-                $middlewareInjector : get_class($middlewareInjector)
+            'middlewares' => $this->jsonSerializeMiddlewares()
         ];
+    }
+
+    private function jsonSerializeMiddlewares(): array
+    {
+        $json = [];
+        foreach ($this->getMiddlewares() as $middleware) {
+            $json[] = $middleware instanceof \JsonSerializable ? $middleware : get_class($middleware);
+        }
     }
 }

@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use SAREhub\Microt\App\Controller\ControllerActionRoute;
 use SAREhub\Microt\App\Controller\ControllerActionRoutes;
 use Slim\App;
+use Slim\Interfaces\RouteGroupInterface;
 
 class ControllerActionRoutesTest extends TestCase
 {
@@ -23,7 +24,6 @@ class ControllerActionRoutesTest extends TestCase
     {
         $this->routes = ControllerActionRoutes::create('base', 'c');
     }
-
 
     /**
      * @param string $httpMethod
@@ -60,13 +60,37 @@ class ControllerActionRoutesTest extends TestCase
         $this->assertSame([$r], $this->routes->getRoutes());
     }
 
-    public function testInjectTo()
+    public function testInjectToThenAppGroup()
     {
         $app = \Mockery::mock(App::class);
+        $app->expects("group")
+            ->withArgs([$this->routes->getBaseUri(), \Mockery::any()])
+            ->andReturn(\Mockery::mock(RouteGroupInterface::class));
+        $this->routes->injectTo($app);
+    }
+
+    public function testInjectToThenActionRoutesInjectTo()
+    {
+        $app = new App();
         $route = \Mockery::mock(ControllerActionRoute::class);
         $route->shouldIgnoreMissing($route);
         $route->expects('injectTo')->withArgs([$app]);
         $this->routes->addRoute($route);
+        $this->routes->injectTo($app);
+    }
+
+    public function testInjectToWhenHasMiddlewares()
+    {
+        $app = \Mockery::mock(App::class);
+        $middleware = function () {
+        };
+        $this->routes->addMiddleware($middleware);
+
+        $routeGroup = \Mockery::mock(RouteGroupInterface::class);
+        $app->expects("group")->andReturn($routeGroup);
+
+        $routeGroup->expects("add")->withArgs([$middleware]);
+
         $this->routes->injectTo($app);
     }
 
