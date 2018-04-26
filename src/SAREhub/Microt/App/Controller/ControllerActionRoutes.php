@@ -79,7 +79,6 @@ class ControllerActionRoutes implements MiddlewareInjector, \JsonSerializable
     public function addRoute(ControllerActionRoute $r): self
     {
         $r->controller($this->getController());
-        $r->pattern($this->getBaseUri() . $r->getPattern());
         $this->routes[] = $r;
         return $this;
     }

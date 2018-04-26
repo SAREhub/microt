@@ -31,10 +31,10 @@ class ControllerActionRoutesTest extends TestCase
      */
     public function testCreatedRoute(string $httpMethod)
     {
-        $expectedPattern = "p";
-        $expectedAction = "a";
-        $route = $this->routes->$httpMethod($expectedPattern, $expectedAction);
-        $this->assertRoute(strtoupper($httpMethod), $this->routes->getBaseUri() . $expectedPattern, $expectedAction, $route);
+        $pattern = "p";
+        $action = "a";
+        $route = $this->routes->$httpMethod($pattern, $action);
+        $this->assertRoute(strtoupper($httpMethod), $pattern, $action, $route);
         $this->assertRouteController('c', $route);
         $this->assertSame([$route], $this->routes->getRoutes());
     }
@@ -53,10 +53,10 @@ class ControllerActionRoutesTest extends TestCase
 
     public function testAddRoute()
     {
-        $r = ControllerActionRoute::route()->pattern('/p');
+        $r = ControllerActionRoute::route()->pattern('p');
         $this->routes->addRoute($r);
         $this->assertRouteController('c', $r);
-        $this->assertRoutePattern('base/p', $r);
+        $this->assertRoutePattern('p', $r);
         $this->assertSame([$r], $this->routes->getRoutes());
     }
 
