@@ -24,7 +24,7 @@
     "slim/slim-skeleton": "^3.0",
     "monolog/monolog": "1.*",
     "respect/validation": "^1.1",
-    "sarehub/dockerutil": "^0.2",
+    "sarehub/dockerutil": "^0.3",
     "php-di/slim-bridge": "^2.0",
     "php-di/php-di": "^6.0"
   },
