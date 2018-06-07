@@ -10,10 +10,13 @@ class MultiMiddlewareInjector implements MiddlewareInjector
 {
 
     /**
-     * @var MiddlewareInjector[]
+     * @var array
      */
     private $injectors;
 
+    /**
+     * @param array $injectors Array with mixed MiddlewareInjector and callable entries
+     */
     public function __construct(array $injectors)
     {
         $this->injectors = $injectors;
@@ -21,8 +24,12 @@ class MultiMiddlewareInjector implements MiddlewareInjector
 
     public function injectTo(App $app)
     {
-        foreach ($this->injectors as $i) {
-            $i->injectTo($app);
+        foreach ($this->injectors as $injector) {
+            if ($injector instanceof MiddlewareInjector) {
+                $injector->injectTo($app);
+            } else {
+                $app->add($injector);
+            }
         }
     }
 }

@@ -19,20 +19,38 @@
 namespace SAREhub\Microt\App\Middleware;
 
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
+use SAREhub\Microt\Test\CallableMock;
 use Slim\App;
 
 class MultiMiddlewareInjectorTest extends TestCase
 {
-
     use MockeryPHPUnitIntegration;
 
-    public function testInjectTo()
+    /**
+     * @var MockInterface | App
+     */
+    private $app;
+
+    protected function setUp()
     {
-        $app = \Mockery::mock(App::class);
+        $this->app = \Mockery::mock(App::class);
+    }
+
+    public function testInjectToWhenIsInstanceOfInjector()
+    {
         $injector = \Mockery::mock(MiddlewareInjector::class);
-        $injector->expects('injectTo')->withArgs([$app]);
+        $injector->expects('injectTo')->withArgs([$this->app]);
         $multiInjector = new MultiMiddlewareInjector([$injector]);
-        $multiInjector->injectTo($app);
+        $multiInjector->injectTo($this->app);
+    }
+
+    public function testInjectToWhenIsNotInstanceOfInjector()
+    {
+        $middleware = CallableMock::create();
+        $this->app->expects("add")->withArgs([$middleware]);
+        $multiInjector = new MultiMiddlewareInjector([$middleware]);
+        $multiInjector->injectTo($this->app);
     }
 }

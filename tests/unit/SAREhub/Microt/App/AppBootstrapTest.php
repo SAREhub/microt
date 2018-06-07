@@ -14,6 +14,16 @@ class AppBootstrapTest extends TestCase
     use MockeryPHPUnitIntegration;
 
     /**
+     * @var ContainerConfigurator
+     */
+    private $containerConfigurator;
+
+    /**
+     * @var MockInterface | MiddlewareInjector
+     */
+    private $middlewareInjector;
+
+    /**
      * @var MockInterface | ServiceAppFactory
      */
     private $appFactory;
@@ -25,95 +35,64 @@ class AppBootstrapTest extends TestCase
 
     protected function setUp()
     {
+        $this->containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
+        $this->middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
+        $runOptions = new AppRunOptions($this->containerConfigurator, $this->middlewareInjector);
         $this->appFactory = \Mockery::mock(ServiceAppFactory::class);
-        $this->bootstrap = new AppBootstrap($this->appFactory);
+
+        $this->bootstrap = new AppBootstrap($runOptions, $this->appFactory);
     }
 
-    public function testRunThenAppFactoryCreate()
+    public function testRun()
     {
-        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
-        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
-
-        $app = \Mockery::mock(ServiceApp::class)->shouldIgnoreMissing();
-        $this->appFactory->expects("create")->withArgs([$containerConfigurator])->andReturn($app);
-
-        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
-    }
-
-    public function testRunThenMiddlewareInjector()
-    {
-        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
-        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class);
-
-        $app = \Mockery::mock(ServiceApp::class)->shouldIgnoreMissing();
-        $this->appFactory->shouldIgnoreMissing($app);
-
-        $middlewareInjector->expects("injectTo")->withArgs([$app]);
-
-        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
-    }
-
-    public function testRunThenAppRun()
-    {
-        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
-        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
-
         $app = \Mockery::mock(ServiceApp::class);
-        $this->appFactory->shouldIgnoreMissing($app);
-
+        $this->appFactory->expects("create")->withArgs([$this->containerConfigurator])->andReturn($app);
+        $this->middlewareInjector->expects("injectTo")->withArgs([$app]);
         $app->expects("run");
 
-        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+        $this->bootstrap->run();
     }
 
     public function testRunWhenAppFactoryCreateThrowsExceptionThenRespondWithInternalError()
     {
-        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
-        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
-
-        $basicApp = \Mockery::mock(ServiceApp::class);
+        $this->middlewareInjector->shouldIgnoreMissing();
         $exception = new \Exception("error");
-        $this->appFactory->expects("create")->withArgs([$containerConfigurator])->andThrow($exception);
-        $this->appFactory->expects("createBasic")->andReturn($basicApp);
+        $this->appFactory->expects("create")->withArgs([$this->containerConfigurator])->andThrow($exception);
 
-        $basicApp->expects("respondWithInternalErrorResponse")->withArgs([$exception]);
+        $this->expectsBasicAppRespondWithInternalErrorResponse($exception);
 
-        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+        $this->bootstrap->run();
     }
 
     public function testRunWhenMiddlewareInjectorInjectToThrowsExceptionThenRespondWithInternalError()
     {
-        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
-        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class);
-
         $app = \Mockery::mock(ServiceApp::class);
-        $this->appFactory->expects("create")->withArgs([$containerConfigurator])->andReturn($app);
-
+        $this->appFactory->expects("create")->withArgs([$this->containerConfigurator])->andReturn($app);
         $exception = new \Exception("error");
-        $middlewareInjector->expects("injectTo")->withArgs([$app])->andThrow($exception);
+        $this->middlewareInjector->expects("injectTo")->withArgs([$app])->andThrow($exception);
 
-        $basicApp = \Mockery::mock(ServiceApp::class);
-        $this->appFactory->expects("createBasic")->andReturn($basicApp);
-        $basicApp->expects("respondWithInternalErrorResponse")->withArgs([$exception]);
+        $this->expectsBasicAppRespondWithInternalErrorResponse($exception);
 
-        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+        $this->bootstrap->run();
     }
 
     public function testRunWhenAppRunThrowsExceptionThenRespondWithInternalError()
     {
-        $containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
-        $middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
-
+        $this->middlewareInjector->shouldIgnoreMissing();
         $app = \Mockery::mock(ServiceApp::class);
-        $this->appFactory->expects("create")->withArgs([$containerConfigurator])->andReturn($app);
-
+        $this->appFactory->expects("create")->withArgs([$this->containerConfigurator])->andReturn($app);
         $exception = new \Exception("error");
         $app->expects("run")->withArgs([])->andThrow($exception);
+
+        $this->expectsBasicAppRespondWithInternalErrorResponse($exception);
+
+        $this->bootstrap->run();
+    }
+
+    private function expectsBasicAppRespondWithInternalErrorResponse(\Throwable $e)
+    {
         $basicApp = \Mockery::mock(ServiceApp::class);
         $this->appFactory->expects("createBasic")->andReturn($basicApp);
-
-        $basicApp->expects("respondWithInternalErrorResponse")->withArgs([$exception]);
-
-        $this->bootstrap->run($containerConfigurator, $middlewareInjector);
+        $basicApp->expects("respondWithInternalErrorResponse")->withArgs([$e]);
     }
 }

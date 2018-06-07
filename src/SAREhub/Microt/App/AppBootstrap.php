@@ -4,8 +4,6 @@
 namespace SAREhub\Microt\App;
 
 
-use SAREhub\Microt\App\Middleware\MiddlewareInjector;
-
 class AppBootstrap
 {
     /**
@@ -13,21 +11,44 @@ class AppBootstrap
      */
     private $appFactory;
 
-    public function __construct(ServiceAppFactory $appFactory)
+    /**
+     * @var AppRunOptions
+     */
+    private $runOptions;
+
+    public function __construct(AppRunOptions $runOptions, ServiceAppFactory $appFactory)
     {
+        $this->runOptions = $runOptions;
         $this->appFactory = $appFactory;
     }
 
-    public function run(ContainerConfigurator $containerConfigurator, MiddlewareInjector $injector)
+    public static function create(AppRunOptions $runOptions, ?ServiceAppFactory $appFactory = null): self
+    {
+        return new self($runOptions, $appFactory ?? new ServiceAppFactory());
+    }
+
+    /**
+     * Creates and runs app
+     */
+    public function run(): void
     {
         try {
-            $app = $this->appFactory->create($containerConfigurator);
-            $injector->injectTo($app);
-            $app->run();
+            $this->createApp()->run();
         } catch (\Throwable $e) {
-            $basicApp = $this->appFactory->createBasic();
-            $basicApp->respondWithInternalErrorResponse($e);
+            $this->handleException($e);
         }
+    }
 
+    private function createApp(): ServiceApp
+    {
+        $app = $this->appFactory->create($this->runOptions->getContainerConfigurator());
+        $this->runOptions->getMiddlewareInjector()->injectTo($app);
+        return $app;
+    }
+
+    private function handleException(\Throwable $e): void
+    {
+        $basicApp = $this->appFactory->createBasic();
+        $basicApp->respondWithInternalErrorResponse($e);
     }
 }
