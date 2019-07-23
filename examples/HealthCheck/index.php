@@ -1,8 +1,14 @@
 <?php
-
+/**
+ * Simple app with health check route
+ * BROWSER: http://localhost:8080/my/health
+ */
 use DI\ContainerBuilder;
+use function DI\create;
+use function DI\factory;
 use SAREhub\Microt\App\AppBootstrap;
 use SAREhub\Microt\App\AppRunOptions;
+use SAREhub\Microt\App\AppRunOptionsProvider;
 use SAREhub\Microt\App\BasicContainerConfigurator;
 use SAREhub\Microt\App\ChainContainerConfigurator;
 use SAREhub\Microt\App\ContainerConfigurator;
@@ -30,17 +36,25 @@ class HealthCheckContainerConfigurator implements ContainerConfigurator
     public function configure(ContainerBuilder $builder)
     {
         $builder->addDefinitions([
-            HealthCheckCommand::class => \DI\create(SimpleHealthCheckCommand::class),
-            HealthCheckRoutesProvider::class => \DI\create()->constructor("/my"),
+            HealthCheckCommand::class => create(SimpleHealthCheckCommand::class),
+            HealthCheckRoutesProvider::class => create()->constructor("/my"),
             self::APP_MIDDLEWARES => [
-                \DI\factory(HealthCheckRoutesProvider::class)
+                factory(HealthCheckRoutesProvider::class)
             ]
         ]);
     }
 }
 
-$appRunOptions = new AppRunOptions(new ChainContainerConfigurator([
-    new BasicContainerConfigurator(),
-    new HealthCheckContainerConfigurator()
-]), new AppMiddlewaresInjector(HealthCheckContainerConfigurator::APP_MIDDLEWARES));
-AppBootstrap::create($appRunOptions)->run();
+class SimpleAppRunOptionsProvider implements AppRunOptionsProvider
+{
+
+    public function get(): AppRunOptions
+    {
+        return new AppRunOptions(new ChainContainerConfigurator([
+            new BasicContainerConfigurator(),
+            new HealthCheckContainerConfigurator()
+        ]), new AppMiddlewaresInjector(HealthCheckContainerConfigurator::APP_MIDDLEWARES));
+    }
+}
+
+AppBootstrap::create(new SimpleAppRunOptionsProvider())->run();

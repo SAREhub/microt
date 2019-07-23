@@ -38,9 +38,12 @@ class AppBootstrapTest extends TestCase
         $this->containerConfigurator = \Mockery::mock(ContainerConfigurator::class);
         $this->middlewareInjector = \Mockery::mock(MiddlewareInjector::class)->shouldIgnoreMissing();
         $runOptions = new AppRunOptions($this->containerConfigurator, $this->middlewareInjector);
+
+        $runOptionsProvider = \Mockery::mock(AppRunOptionsProvider::class);
+        $runOptionsProvider->expects("get")->andReturn($runOptions);
         $this->appFactory = \Mockery::mock(ServiceAppFactory::class);
 
-        $this->bootstrap = new AppBootstrap($runOptions, $this->appFactory);
+        $this->bootstrap = AppBootstrap::create($runOptionsProvider, $this->appFactory);
     }
 
     public function testRun()

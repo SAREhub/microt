@@ -1,8 +1,12 @@
 <?php
-
+/**
+ * Simple app + route with attribute
+ * BROWSER: http://localhost:8080/hello/<your name>
+ */
 use DI\ContainerBuilder;
 use SAREhub\Microt\App\AppBootstrap;
 use SAREhub\Microt\App\AppRunOptions;
+use SAREhub\Microt\App\AppRunOptionsProvider;
 use SAREhub\Microt\App\BasicContainerConfigurator;
 use SAREhub\Microt\App\ChainContainerConfigurator;
 use SAREhub\Microt\App\ContainerConfigurator;
@@ -35,7 +39,16 @@ class SimpleMiddlewareInjector implements MiddlewareInjector
     }
 }
 
-AppBootstrap::create(new AppRunOptions(new ChainContainerConfigurator([
-    new BasicContainerConfigurator(),
-    new SimpleContainerConfigurator()
-]), new SimpleMiddlewareInjector()))->run();
+class SimpleAppRunOptionsProvider implements AppRunOptionsProvider
+{
+
+    public function get(): AppRunOptions
+    {
+        return new AppRunOptions(new ChainContainerConfigurator([
+            new BasicContainerConfigurator(),
+            new SimpleContainerConfigurator()
+        ]), new SimpleMiddlewareInjector());
+    }
+}
+
+AppBootstrap::create(new SimpleAppRunOptionsProvider())->run();
