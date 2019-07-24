@@ -156,5 +156,6 @@ class ControllerActionRoutes implements MiddlewareInjector, \JsonSerializable
         foreach ($this->getMiddlewares() as $middleware) {
             $json[] = $middleware instanceof \JsonSerializable ? $middleware : get_class($middleware);
         }
+        return $json;
     }
 }
