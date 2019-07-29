@@ -20,14 +20,14 @@ class ValidatorHelper
         try {
             $validator->assert($data);
             return true;
-        } catch (NestedValidationException $exception) {
-            throw new DataValidationException($exception);
+        } catch (NestedValidationException $e) {
+            throw DataValidationException::createFromRespectException($e);
         }
     }
 
     public function createBadRequestJsonResponse($message, DataValidationException $exception, Response $response)
     {
-        return JsonResponse::wrap($response)->badRequest($message, $exception->getErrors());
+        return JsonResponse::wrap($response)->badRequest($message, $exception->getErrorDetails());
     }
 
     public function validate(Validator $validator, $data, &$errors): bool

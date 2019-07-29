@@ -59,7 +59,7 @@ class ValidatorHelperTest extends TestCase
             $this->helper->assert($this->validator, $data);
         } catch (DataValidationException $e) {
             $expectedErrors = $this->extractExpectedErrors($data);
-            $this->assertEquals($expectedErrors, $e->getErrors());
+            $this->assertEquals($expectedErrors, $e->getErrorDetails());
             return;
         }
 
@@ -69,14 +69,13 @@ class ValidatorHelperTest extends TestCase
     public function testCreateBadRequestJsonResponse()
     {
         $message = "test_message";
-        $exception = \Mockery::mock(DataValidationException::class);
-        $expectedErrors = ["test_errors"];
-        $exception->expects("getErrors")->andReturn($expectedErrors);
+        $expectedErrorDetails = ["test_errors"];
+        $exception = new DataValidationException($message, $expectedErrorDetails);
         $response = $this->helper->createBadRequestJsonResponse($message, $exception, new Response());
         $response->getBody()->rewind();
         $expectedJson = [
             "message" => $message,
-            "details" => $expectedErrors
+            "details" => $expectedErrorDetails
         ];
 
         $this->assertEquals(400, $response->getStatusCode());
