@@ -39,7 +39,7 @@ class HttpHelper
         return self::request()->withAttributes($attributes);
     }
 
-    public static function requestWithJson(array $data): Request
+    public static function requestWithJson($data): Request
     {
         return self::requestWithBody(json_encode($data))->withHeader('Content-Type', 'application/json');
     }

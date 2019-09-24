@@ -4,19 +4,13 @@
 namespace SAREhub\Microt\App\Request;
 
 
-use Respect\Validation\Validator;
 use function DI\create;
 
 class ValidationDefinitionHelper
 {
-    public static function attributes(Validator $validator)
+    public static function allOffMiddleware(array $requestValidators)
     {
-        return create(AttributesValidator::class)->constructor($validator);
-    }
-
-    public static function queryParams(Validator $validator)
-    {
-        return create(QueryParamsValidator::class)->constructor($validator);
+        return self::middleware(self::allOf($requestValidators));
     }
 
     public static function allOf(array $requestValidators)
@@ -27,5 +21,20 @@ class ValidationDefinitionHelper
     public static function middleware($requestValidatorDef)
     {
         return create(RequestValidationMiddleware::class)->constructor($requestValidatorDef);
+    }
+
+    public static function attributes($validator)
+    {
+        return create(AttributesValidator::class)->constructor($validator);
+    }
+
+    public static function queryParams($validator)
+    {
+        return create(QueryParamsValidator::class)->constructor($validator);
+    }
+
+    public static function parsedBody($validator)
+    {
+        return create(ParsedBodyValidator::class)->constructor($validator);
     }
 }
