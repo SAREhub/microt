@@ -10,9 +10,9 @@ class ExampleControllerRoutesProvider extends ControllerRoutesProvider
 
     public $actionRoute;
 
-    public function __construct(array $middlewares = [])
+    public function __construct(array $groupMiddlewares = [], $actionMiddlewares = [])
     {
-        parent::__construct($middlewares);
+        parent::__construct($groupMiddlewares, $actionMiddlewares);
         $this->actionRoute = ControllerActionRoute::get("test", "test");
     }
 
@@ -58,9 +58,7 @@ class ControllerRoutesProviderTest extends TestCase
 
     public function testGetThenRoutesHasMiddlewares()
     {
-        $middleware = function () {
-
-        };
+        $middleware = $this->createMiddleware();
         $provider = new ExampleControllerRoutesProvider([$middleware]);
 
         $routes = $provider->get();
@@ -75,5 +73,27 @@ class ControllerRoutesProviderTest extends TestCase
         $routes = $provider->get();
 
         $this->assertSame($provider->actionRoute, $routes->getRoutes()[0]);
+    }
+
+    public function testGetThenActionRouteHasMiddlewares()
+    {
+        $middleware = $this->createMiddleware();
+        $provider = new ExampleControllerRoutesProvider([], [
+            "test" => [$middleware]
+        ]);
+
+        $routes = $provider->get();
+
+        $actionRoute = $routes->getRoutes()[0];
+        $actionRouteMiddlewares = $actionRoute->getMiddlewares();
+        $this->assertCount(1, $actionRouteMiddlewares);
+        $this->assertSame($middleware, $actionRouteMiddlewares[0]);
+    }
+
+    private function createMiddleware(): callable
+    {
+        return function () {
+
+        };
     }
 }

@@ -11,11 +11,17 @@ abstract class ControllerRoutesProvider extends InvokableProvider
     /**
      * @var callable[]
      */
-    private $middlewares;
+    private $groupMiddlewares;
 
-    public function __construct(array $middlewares = [])
+    /**
+     * @var callable[]
+     */
+    private $actionMiddlewares;
+
+    public function __construct(array $groupMiddlewares = [], array $actionMiddlewares = [])
     {
-        $this->middlewares = $middlewares;
+        $this->groupMiddlewares = $groupMiddlewares;
+        $this->actionMiddlewares = $actionMiddlewares;
     }
 
     /**
@@ -24,8 +30,14 @@ abstract class ControllerRoutesProvider extends InvokableProvider
     public function get()
     {
         $routes = ControllerActionRoutes::create($this->getBaseUri(), $this->getControllerClass());
-        $this->injectMiddlewares($routes);
+        return $this->inject($routes);
+    }
+
+    protected function inject(ControllerActionRoutes $routes): ControllerActionRoutes
+    {
         $this->injectRoutes($routes);
+        $this->injectGroupMiddlewares($routes);
+        $this->injectActionsMiddlewares($routes);
         return $routes;
     }
 
@@ -33,12 +45,29 @@ abstract class ControllerRoutesProvider extends InvokableProvider
 
     protected abstract function getControllerClass(): string;
 
-    private function injectMiddlewares(ControllerActionRoutes $routes)
+    protected abstract function injectRoutes(ControllerActionRoutes $routes);
+
+    protected function injectGroupMiddlewares(ControllerActionRoutes $routes)
     {
-        foreach ($this->middlewares as $middleware) {
+        foreach ($this->groupMiddlewares as $middleware) {
             $routes->addMiddleware($middleware);
         }
     }
 
-    protected abstract function injectRoutes(ControllerActionRoutes $routes);
+    protected function injectActionsMiddlewares(ControllerActionRoutes $routes)
+    {
+        foreach ($routes->getRoutes() as $route) {
+            $this->injectActionMiddlewares($route);
+        }
+    }
+
+    protected function injectActionMiddlewares(ControllerActionRoute $route)
+    {
+        $action = $route->getAction();
+        if (isset($this->actionMiddlewares[$action])) {
+            foreach ($this->actionMiddlewares[$action] as $middleware) {
+                $route->addMiddleware($middleware);
+            }
+        }
+    }
 }
