@@ -6,7 +6,7 @@ namespace SAREhub\Microt\App\Request;
 
 use Respect\Validation\Validatable;
 
-class ValidatorWrapperFactory
+class ValidatorWrapper
 {
     /**
      * @var Validatable
@@ -23,10 +23,8 @@ class ValidatorWrapperFactory
         return new self($validator);
     }
 
-    public function __invoke()
+    public function getValidator(): Validatable
     {
         return $this->validator;
     }
-
-
 }

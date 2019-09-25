@@ -9,6 +9,7 @@ use DI\Definition\Helper\DefinitionHelper;
 use Respect\Validation\Validatable;
 use function DI\create;
 use function DI\factory;
+use function DI\value;
 
 class ValidationDefinitionHelper
 {
@@ -57,7 +58,9 @@ class ValidationDefinitionHelper
     private static function validatorDef($validator)
     {
         if ($validator instanceof Validatable) {
-            return factory(ValidatorWrapperFactory::create($validator));
+            return factory(function (Validatable $validator) {
+                return $validator;
+            })->parameter(0, value(ValidatorWrapper::create($validator)));
         }
 
         return $validator;

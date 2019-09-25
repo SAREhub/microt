@@ -4,6 +4,7 @@ namespace SAREhub\Microt\Util;
 
 
 use Respect\Validation\Exceptions\NestedValidationException;
+use Respect\Validation\Validatable;
 use Respect\Validation\Validator;
 use Slim\Http\Response;
 
@@ -15,7 +16,7 @@ class ValidatorHelper
      * @return bool
      * @throws DataValidationException
      */
-    public function assert(Validator $validator, $data)
+    public function assert(Validatable $validator, $data)
     {
         try {
             $validator->assert($data);
