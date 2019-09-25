@@ -8,7 +8,7 @@ use function DI\create;
 
 class ValidationDefinitionHelper
 {
-    public static function allOffMiddleware(array $requestValidators)
+    public static function allOfMiddleware(array $requestValidators)
     {
         return self::middleware(self::allOf($requestValidators));
     }
