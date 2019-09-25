@@ -4,6 +4,7 @@
 namespace SAREhub\Microt\App\Request;
 
 
+use Respect\Validation\Validatable;
 use Respect\Validation\Validator;
 use SAREhub\Microt\Util\ValidatorHelper;
 use Slim\Http\Request;
@@ -21,7 +22,7 @@ class ParsedBodyValidator implements RequestValidator
      */
     private $helper;
 
-    public function __construct(Validator $validator, ?ValidatorHelper $helper = null)
+    public function __construct(Validatable $validator, ?ValidatorHelper $helper = null)
     {
         $this->validator = $validator;
         $this->helper = $helper ?? new ValidatorHelper;
