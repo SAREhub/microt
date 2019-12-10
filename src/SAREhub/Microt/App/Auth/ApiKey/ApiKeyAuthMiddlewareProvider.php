@@ -10,21 +10,26 @@ use SAREhub\Commons\Secret\SecretValueProvider;
 
 class ApiKeyAuthMiddlewareProvider extends InvokableProvider
 {
-    const ENV_API_KEY_SECRET = "API_AUTH_APIKEY";
+    const DEFAULT_ENV_API_KEY_SECRET = "API_AUTH_APIKEY_SECRET";
 
     /**
      * @var SecretValueProvider
      */
     private $secretValueProvider;
+    /**
+     * @var string
+     */
+    private $secretNameEnvVar;
 
-    public function __construct(SecretValueProvider $secretValueProvider)
+    public function __construct(SecretValueProvider $secretValueProvider, string $secretNameEnvVar = self::DEFAULT_ENV_API_KEY_SECRET)
     {
         $this->secretValueProvider = $secretValueProvider;
+        $this->secretNameEnvVar = $secretNameEnvVar;
     }
 
     public function get()
     {
-        $secretName = EnvironmentHelper::getRequiredVar(self::ENV_API_KEY_SECRET);
+        $secretName = EnvironmentHelper::getRequiredVar($this->secretNameEnvVar);
         return new ApiKeyAuthMiddleware($this->secretValueProvider->get($secretName));
     }
 }
