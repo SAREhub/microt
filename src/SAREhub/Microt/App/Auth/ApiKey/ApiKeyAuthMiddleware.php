@@ -34,7 +34,8 @@ class ApiKeyAuthMiddleware implements MiddlewareInjector
         if ($request->getQueryParam(self::QP_APIKEY, "") !== $this->apiKey) {
             return JsonResponse::wrap($response)->error("Invalid apiKey", [], 401);
         }
-        $next($request, $response);
+
+        return $next($request, $response);
     }
 
 

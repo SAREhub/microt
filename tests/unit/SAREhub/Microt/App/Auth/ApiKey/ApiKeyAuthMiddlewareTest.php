@@ -32,9 +32,11 @@ class ApiKeyAuthMiddlewareTest extends TestCase
         $response = HttpHelper::response();
         $next = CallableMock::create();
 
-        $next->expects("__invoke")->with($request, $response);
+        $expectedResponse = HttpHelper::response();
+        $next->expects("__invoke")->with($request, $response)->andReturn($expectedResponse);
 
-        ($this->middleware)($request, $response, $next);
+        $currentResponse = ($this->middleware)($request, $response, $next);
+        $this->assertSame($expectedResponse, $currentResponse);
     }
 
     public function testInvokeWhenNotPassed()
