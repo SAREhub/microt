@@ -58,8 +58,8 @@ class ValidationDefinitionHelper
     private static function validatorDef($validator)
     {
         if ($validator instanceof Validatable) {
-            return factory(function (Validatable $validator) {
-                return $validator;
+            return factory(function (ValidatorWrapper $wrapper) {
+                return $wrapper->getValidator();
             })->parameter(0, value(ValidatorWrapper::create($validator)));
         }
 
