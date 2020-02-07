@@ -96,7 +96,7 @@ class ControllerActionRoute implements MiddlewareInjector, \JsonSerializable
         return $this;
     }
 
-    public function addMiddleware($middleware): ControllerActionRoute
+    public function addMiddleware(callable $middleware): ControllerActionRoute
     {
         $this->middlewares[] = $middleware;
         return $this;
